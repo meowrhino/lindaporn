@@ -49,7 +49,8 @@ async function main() {
           `  font-style: normal;\n` +
           `  font-weight: ${weight};\n` +
           `  font-display: swap;\n` +
-          `  src: url('/assets/fonts/${slug}') format('woff2');\n` +
+          // Relativa a docs/assets/styles.css, que es donde acaba este CSS.
+          `  src: url('fonts/${slug}') format('woff2');\n` +
           `  unicode-range: ${range};\n}`,
       );
       console.log(`  ${slug}`);

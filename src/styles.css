@@ -1,4 +1,6 @@
-@import url('/assets/fonts/fonts.css');
+/* build.js antepone a este fichero assets/fonts/fonts.css y escribe el
+   resultado en docs/assets/styles.css: una sola petición y sin @import
+   con ruta absoluta, que se rompería al servir el sitio en un subdirectorio. */
 
 /* ---------------------------------------------------------------
    Linda Iriane — hoja de estilos única.

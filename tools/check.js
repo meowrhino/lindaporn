@@ -57,6 +57,16 @@ for (const archivo of ficheros) {
   }
 }
 
+// El CSS también referencia ficheros (tipografías): una ruta absoluta ahí
+// rompe el sitio cuando se sirve dentro de un subdirectorio, y el HTML no lo delata.
+const css = join(OUT, 'assets', 'styles.css');
+for (const [, url] of (await readFile(css, 'utf8')).matchAll(/url\(['"]?([^)'"]+)['"]?\)/g)) {
+  if (/^(https?:|data:)/.test(url)) continue;
+  if (url.startsWith('/')) aviso(css, `ruta absoluta en el CSS → ${url}`);
+  else if (!existsSync(resolve(dirname(css), url))) aviso(css, `recurso del CSS roto → ${url}`);
+  imagenes++;
+}
+
 // Peso del HTML frente a los 2,5 MB de CSS que traía el tema
 let pesoHtml = 0;
 for (const f of ficheros) pesoHtml += (await stat(f)).size;

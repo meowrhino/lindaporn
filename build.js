@@ -546,8 +546,13 @@ async function main() {
 
   // Estáticos
   await cp(join(ROOT, 'assets'), join(OUT, 'assets'), { recursive: true });
-  await cp(join(ROOT, 'src', 'styles.css'), join(OUT, 'assets', 'styles.css'));
   await cp(join(ROOT, 'src', 'main.js'), join(OUT, 'assets', 'main.js'));
+
+  // Las @font-face van dentro de la hoja principal: una petición menos y
+  // ninguna ruta absoluta que se rompa al servir el sitio en un subdirectorio.
+  const fuentes = await readFile(join(ROOT, 'assets', 'fonts', 'fonts.css'), 'utf8');
+  const estilos = await readFile(join(ROOT, 'src', 'styles.css'), 'utf8');
+  await writeFile(join(OUT, 'assets', 'styles.css'), `${fuentes}\n${estilos}`);
 
   await writeFile(join(OUT, 'feed.xml'), feed());
   await writeFile(join(OUT, 'sitemap.xml'), sitemap(paginas.map((p) => p.url)));
