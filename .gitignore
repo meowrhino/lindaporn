@@ -1,0 +1,9 @@
+# Originales descargados del WordPress viejo (200 MB). Se regeneran con
+# `npm run images`; en el repo solo van los WebP de assets/img.
+.cache/
+
+# Salida del generador: la construye GitHub Actions en cada push.
+docs/
+
+node_modules/
+.DS_Store

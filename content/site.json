@@ -1,0 +1,263 @@
+{
+  "_comentario": "Configuración de la web. Este es el fichero que se edita a mano para cambiar textos, menú, precios o galerías. El blog vive en posts.json y se regenera con tools/extract.js.",
+
+  "titulo": "Linda Iriane",
+  "eslogan": "Escort en Barcelona",
+  "descripcion": "Linda Iriane, escort GFE en Barcelona. Arte, conversación y el placer de todos los sentidos.",
+  "idioma": "es",
+  "url": "https://lindairiane.com",
+  "copyright": "Linda Iriane © 2018. Todos los derechos reservados.",
+  "favicon": "2018/10/bdsmLinda.jpg",
+
+  "contacto": {
+    "telefono": "(+34) 633682761",
+    "telefonoRaw": "+34633682761",
+    "email": "lindairianescort@gmail.com",
+    "horario": "11.00 – 22.00",
+    "dias": "Lunes a Domingo",
+    "donde": ["Barcelona", "London", "Antwerpen"]
+  },
+
+  "social": [
+    { "nombre": "Instagram", "url": "https://www.instagram.com/linda_iriane/" },
+    { "nombre": "Twitter", "url": "https://twitter.com/Lindairiane" }
+  ],
+
+  "menu": [
+    { "texto": "Home", "url": "/" },
+    {
+      "texto": "Fotos",
+      "url": "/ultimas-fotos/",
+      "hijos": [
+        { "texto": "Últimas Fotos", "url": "/ultimas-fotos/" },
+        { "texto": "Mis Fotos", "url": "/mis-fotos/" }
+      ]
+    },
+    {
+      "texto": "Servicios",
+      "url": "/servicios/",
+      "hijos": [
+        { "texto": "Servicios", "url": "/servicios/" },
+        { "texto": "BDSM", "url": "/bdsm/" }
+      ]
+    },
+    { "texto": "Sex & Art", "url": "/sex-and-art/" },
+    { "texto": "Contacto", "url": "/contacto/" }
+  ],
+
+  "menuPie": [
+    { "texto": "Home", "url": "/" },
+    { "texto": "Fotos", "url": "/ultimas-fotos/" },
+    { "texto": "Sex & Art", "url": "/sex-and-art/" },
+    { "texto": "Servicios", "url": "/servicios/" },
+    { "texto": "Contacto", "url": "/contacto/" },
+    { "texto": "Cookies", "url": "/cookies/" },
+    { "texto": "Nota legal", "url": "/nota-legal/" }
+  ],
+
+  "hero": [
+    {
+      "titulo": "El placer de los sentidos",
+      "subtitulo": "Linda Iriane",
+      "boton": "Contacta",
+      "url": "/contacto/",
+      "imagen": "2018/10/slider-desnuda-escort-linda-004.jpg"
+    },
+    {
+      "titulo": "Pasión por viajar",
+      "subtitulo": "Linda Iriane",
+      "boton": "Contacta",
+      "url": "/contacto/",
+      "imagen": "2018/10/slider-playa-escort-linda-002.jpg"
+    },
+    {
+      "titulo": "Relación Sex & Art",
+      "subtitulo": "Linda Iriane",
+      "boton": "Descubre mi pasión",
+      "url": "/sex-and-art/",
+      "imagen": "2018/10/slider-sex-and-art-escort-linda-003.jpg"
+    }
+  ],
+
+  "home": {
+    "intro": {
+      "titulo": "¿Quién soy?",
+      "subtitulo": "Barcelona",
+      "parrafos": [
+        "Hola. Soy Linda. Gracias por visitar mi espacio de placer.<br>Me gusta el juego, pero mis deberes son lo primero.",
+        "Medidas: Altura 1,70 · Pecho 105 · Cintura 70 · Cadera 105 · Peso 68"
+      ]
+    },
+    "bio": {
+      "texto": "El arte es mi vocación, soy licenciada en Arte Dramático y tengo un máster en Actuación. Realizo pequeñas piezas y obras que expongo y presento en museos y teatros de pequeña audiencia.<br>Me encanta viajar, por esa razón vivo a caballo entre Barcelona y la ciudad de los diamantes, Amberes. Me encanta el cine, la literatura, la música, la ópera, todo el arte me estremece y emociona.",
+      "imagen": "2018/06/Linda-4b-baja.jpg",
+      "boton": { "texto": "Contacta conmigo", "url": "/contacto/" }
+    },
+    "franjaOscura": [
+      "Pero mi pequeño gran secreto es la sexualidad. Disfruto de mi cuerpo así como de el/la compañero/a que quiera estar conmigo. Me encanta innovar y explorar el terreno de la alcoba, todas las manifestaciones me gustan, desde <strong>lo más erótico y romántico</strong>, pasando por el streaptease, hasta juegos más complejos como el BDSM.",
+      "Soy una escort Girl Friend Experience; esto quiere decir que podemos disfrutar de cenas románticas, ir a bailar, viajar si así lo prefieres, acompañarte a algún evento, salir a locales liberales… En fin, lo que se nos ocurra y todo como una pareja con ganas de pasarlo bien. Mi saber estar, mi <strong>clase y formación</strong> no te dejarán mal en ningún sitio; además, hablo inglés fluido."
+    ],
+    "cita": "Espero que quieras disfrutar de una mujer guapa, elegante, divertida, cariñosa y culta, pero, sobre todo, de una mujer sin prejuicios, de amplio criterio, de una mujer que por naturaleza disfruta enormemente de la sexualidad, una mujer que se entrega en cuerpo y alma, siempre pensando en su compañero/a, concentrada en el placer de todos los sentidos. No lo olvides, mi alcoba es mi gran secreto, el escenario donde soy yo misma. Escort Barcelona.",
+    "llamadas": [
+      {
+        "titulo": "Conoce mis servicios",
+        "subtitulo": "Mi pasión",
+        "url": "/servicios/",
+        "imagen": "2018/10/claim-cama-escort-linda-004.jpg"
+      },
+      {
+        "titulo": "Sex & Art",
+        "subtitulo": "Blog escort",
+        "url": "/sex-and-art/",
+        "imagen": "2018/06/Linda9-baja.jpg"
+      }
+    ]
+  },
+
+  "servicios": {
+    "titulo": "Linda Iriane",
+    "subtitulo": "Escort Barcelona",
+    "intro": "Espero que quieras disfrutar de una mujer guapa, elegante, divertida, cariñosa y culta, pero, sobre todo, de una mujer sin prejuicios, de amplio criterio, de una mujer que por naturaleza disfruta enormemente de la sexualidad, una mujer que se entrega en cuerpo y alma, siempre pensando en su compañero/a, concentrada en el placer de todos los sentidos.",
+    "portada": "2018/10/banner-servicio-desnuda-linda-iriane-005.jpg",
+    "bloques": [
+      {
+        "nombre": "Erótico",
+        "unidad": "por hora",
+        "tarifas": [
+          { "concepto": "Penetración, francés, ducha, relax", "precio": "150€" },
+          { "concepto": "2 horas", "precio": "300€" },
+          { "concepto": "3 horas", "precio": "400€" },
+          { "concepto": "Lésbico", "precio": "150€" },
+          { "concepto": "Parejas", "precio": "300€" },
+          { "concepto": "Viajes", "precio": "Preguntar" }
+        ]
+      },
+      {
+        "nombre": "Streaptease / Performance",
+        "unidad": "por hora",
+        "tarifas": [
+          { "concepto": "Asistenta", "precio": "180€" },
+          { "concepto": "Policía", "precio": "180€" },
+          { "concepto": "Colegiala", "precio": "180€" },
+          { "concepto": "Profesora", "precio": "180€" },
+          { "concepto": "Enfermera", "precio": "180€" }
+        ]
+      },
+      {
+        "nombre": "Girlfriend Experience",
+        "unidad": "por hora",
+        "tarifas": [
+          { "concepto": "Desayuno, comida o cena romántica", "precio": "100€" },
+          { "concepto": "Salidas a locales o pub's", "precio": "100€" },
+          { "concepto": "Acompañamiento o evento", "precio": "100€" },
+          { "concepto": "Viajes", "precio": "Preguntar" }
+        ]
+      }
+    ],
+    "pie": "Pregunta por mis servicios de…"
+  },
+
+  "bdsm": {
+    "titulo": "Linda Iriane",
+    "subtitulo": "Escort Barcelona",
+    "portada": "2018/10/banner-servicio-bdsm-linda-iriane-006.jpg",
+    "bloques": [
+      {
+        "nombre": "BDSM",
+        "unidad": "por hora",
+        "tarifas": [
+          { "concepto": "BDSM Erótico", "precio": "180€" },
+          { "concepto": "Spanking, bondage, dominación", "precio": "180€" },
+          { "concepto": "Lluvia Dorada", "precio": "180€" },
+          { "concepto": "Travestismo", "precio": "180€" },
+          { "concepto": "Sodomización", "precio": "200€" },
+          { "concepto": "Más servicios", "precio": "Preguntar" }
+        ]
+      }
+    ],
+    "pie": "Barcelona · Murcia"
+  },
+
+  "galerias": {
+    "ultimas-fotos": {
+      "titulo": "Últimas Fotos",
+      "intro": "Soy una mujer atrevida pero elegante. Adoro los grandes y finos placeres, como el arte, la conversación, la buena mesa, viajar y por supuesto el sexo. En mi compañía podrás disfrutar de todas estas cosas, soy una mujer de amplio criterio, la exploración de la sexualidad es una de mis inquietudes.",
+      "fotos": [
+        "2024/05/IMG_4923.jpg",
+        "2024/05/IMG_4920.jpg",
+        "2024/05/IMG_4915.jpg",
+        "2024/05/IMG_3559.jpg",
+        "2024/05/IMG_3557.jpg",
+        "2024/05/IMG_3535.jpg",
+        "2024/05/IMG_3531.jpg",
+        "2024/05/IMG_02fl.jpg",
+        "2024/05/image00002.jpeg",
+        "2022/02/IMG-0273.jpg",
+        "2019/07/LindaPS2139.jpg",
+        "2019/02/fn-linda-001.jpg",
+        "2019/02/fn-linda-002.jpg",
+        "2019/02/fn-linda-003.jpg",
+        "2019/02/fn-linda-004.jpg",
+        "2019/02/fn-linda-005.jpg",
+        "2019/02/fn-linda-006.jpg",
+        "2019/02/fn-linda-007.jpg",
+        "2018/10/linda-iriane-porn-escort-rayas.jpg",
+        "2018/10/linda-iriane-porn-escort-echada.jpg",
+        "2018/10/linda-iriane-porn-escort-contraluz.jpg",
+        "2018/10/mis-ultimas-desnuda-posada-001.jpg",
+        "2018/10/mis-ultimas-desnuda-posado-002.jpg",
+        "2018/10/mis-ultimas-desnuda-posado-003.jpg",
+        "2018/10/mis-ultimas-desnuda-exterior-005.jpg"
+      ]
+    },
+    "mis-fotos": {
+      "titulo": "Mis Fotos",
+      "intro": "",
+      "fotos": [
+        "2018/10/fotos-002.jpg",
+        "2018/10/fotos-003.jpg",
+        "2018/10/fotos-004.jpg",
+        "2018/10/fotos-006.jpg",
+        "2018/10/fotos-007.jpg",
+        "2018/10/fotos-008.jpg",
+        "2018/10/fotos-009.jpg",
+        "2018/10/fotos-010.jpg",
+        "2018/10/fotos-011.jpg",
+        "2018/10/fotos-012.jpg",
+        "2018/10/fotos-013.jpg",
+        "2018/10/fotos-014.jpg",
+        "2018/10/fotos-015.jpg",
+        "2018/10/fotos-016.jpg",
+        "2018/10/ufotos-004.jpg",
+        "2018/10/ufotos-006.jpg"
+      ]
+    }
+  },
+
+  "contacto_pagina": {
+    "titulo": "Contacto",
+    "subtitulo": "Linda Iriane",
+    "textoFormulario": "Escríbeme y te contesto en cuanto pueda.",
+    "avisoFormulario": "Al enviar se abrirá tu programa de correo con el mensaje preparado."
+  },
+
+  "notaLegal": {
+    "titulo": "Nota legal",
+    "parrafos": [
+      "Linda Iriane presta servicios de acompañamiento para personas mayores de edad. El acceso a esta web implica que declaras ser mayor de 18 años.",
+      "Todos los contenidos —textos y fotografías— son propiedad de Linda Iriane y no pueden reproducirse sin autorización expresa.",
+      "El pago de los servicios corresponde exclusivamente al tiempo de compañía. Cualquier otra cosa que suceda es fruto de un acuerdo libre entre personas adultas.",
+      "Para cualquier consulta relativa a esta nota legal o al tratamiento de tus datos, escribe a lindairianescort@gmail.com."
+    ]
+  },
+
+  "cookies": {
+    "titulo": "Cookies",
+    "banner": "Usamos cookies para mejorar tu experiencia en todos los sentidos.",
+    "parrafos": [
+      "Esta web no usa cookies de seguimiento ni de publicidad. No hay analítica de terceros, ni píxeles, ni perfilado.",
+      "El único dato que se guarda en tu navegador es una marca local (<code>localStorage</code>) que recuerda que ya has visto este aviso, para no volver a enseñártelo. No sale de tu dispositivo y puedes borrarla vaciando los datos del sitio en tu navegador.",
+      "Si en el futuro se añadiera cualquier servicio externo que instale cookies, se pedirá tu consentimiento antes y se detallará aquí."
+    ]
+  }
+}
