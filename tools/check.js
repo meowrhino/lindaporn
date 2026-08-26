@@ -28,13 +28,11 @@ for (const archivo of ficheros) {
   const html = await readFile(archivo, 'utf8');
   const base = dirname(archivo);
 
-  // Restos del sitio viejo
-  for (const m of html.matchAll(/https?:\/\/(?:www\.)?lindairiane\.com[^"'\s<]*/g)) {
-    const url = m[0];
-    // Las urls canónicas y og: sí deben apuntar al dominio final.
-    const contexto = html.slice(Math.max(0, m.index - 90), m.index);
-    if (/(canonical|og:url|og:image|<loc>|<link>|<guid)/.test(contexto)) continue;
-    aviso(archivo, `enlace al WordPress viejo → ${url}`);
+  // Restos del sitio viejo. El dominio aparece legítimamente en la canónica, en
+  // las og:, en el feed y en la configuración del editor: solo son sospechosos
+  // los enlaces navegables del cuerpo.
+  for (const m of html.matchAll(/<(a|img|iframe)\b[^>]*\b(?:href|src)="(https?:\/\/(?:www\.)?lindairiane\.com[^"]*)"/gi)) {
+    aviso(archivo, `<${m[1]}> apunta al WordPress viejo → ${m[2]}`);
   }
   if (/\[vc_|\[rev_slider|wp-content|wpcf7/.test(html)) {
     aviso(archivo, 'quedan shortcodes o rutas de WordPress');

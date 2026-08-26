@@ -67,7 +67,10 @@ async function leerEntradas() {
         titulo,
         fecha: `${año}-${mes}-${dia}`,
         permalink: `/${año}/${mes}/${dia}/${slug}/`,
+        // Si no se declara portada se usa la primera foto del texto, pero
+        // entonces no se repite arriba: solo sirve de miniatura en el listado.
         portada: portada || html.match(/<img[^>]+src="([^"]+)"/i)?.[1] || null,
+        portadaPropia: Boolean(portada),
         resumen: resumir(html),
         html: html.trim(),
       });
@@ -89,8 +92,17 @@ function resumir(html, largo = 220) {
 const posts = await leerEntradas();
 
 // '2018/10/foto.jpg', una URL absoluta o una variante -240x359: todo apunta al mismo sitio.
+// Las fotos nuevas ya vienen en WebP desde el editor y apuntan directamente a
+// assets/img/, así que esas no pasan por el mapa de conversión.
 function img(ref) {
   if (!ref) return null;
+
+  const yaLocal = ref.match(/(?:^|\/)(assets\/img\/.+?)(\.thumb)?\.webp$/i);
+  if (yaLocal) {
+    const base = `/${yaLocal[1]}`;
+    return { big: `${base}.webp`, thumb: `${base}.thumb.webp` };
+  }
+
   const i = ref.indexOf('/uploads/');
   let rel = i === -1 ? ref : ref.slice(i + '/uploads/'.length);
   rel = decodeURIComponent(rel).replace(/-\d{2,4}x\d{2,4}(?=\.[a-z]{3,4}$)/i, '');
@@ -467,8 +479,8 @@ function paginasEntradas() {
             <h1>${esc(post.titulo)}</h1>
           </header>
           ${
-            portada
-              ? `<img src="${ruta(portada.big, ctx.prefix)}" alt="" style="margin-bottom:2.5rem" loading="lazy" decoding="async">`
+            portada && post.portadaPropia
+              ? `<img class="articulo__portada" src="${ruta(portada.big, ctx.prefix)}" alt="" loading="lazy" decoding="async">`
               : ''
           }
           <div class="articulo__cuerpo">${limpiarHtml(post.html, ctx)}</div>
@@ -518,6 +530,23 @@ function paginasCategorias() {
   });
 }
 
+// El editor: una página aparte, fuera del sitemap y con noindex. No se enlaza
+// desde ningún sitio; Linda entra escribiendo la dirección.
+async function paginaEscribir() {
+  const opciones = Object.entries(site.categorias)
+    .map(([slug, nombre]) => `<option value="${esc(slug)}">${esc(nombre)}</option>`)
+    .join('');
+
+  const html = (await readFile(join(ROOT, 'src', 'escribir.html'), 'utf8'))
+    .replace('{{repo}}', esc(site.repo))
+    .replace('{{rama}}', esc(site.rama))
+    .replace('{{web}}', esc(site.url.replace(/\/$/, '')))
+    .replace('{{favicon}}', ruta(site.faviconUrl, '../'))
+    .replace('{{categorias}}', opciones);
+
+  return { url: '/escribir/', html };
+}
+
 function pagina404() {
   const ctx = ctxDe('/404.html');
   ctx.prefix = ''; // 404 se sirve desde cualquier ruta: usamos rutas absolutas
@@ -564,7 +593,7 @@ ${items}
 function sitemap(urls) {
   const base = site.url.replace(/\/$/, '');
   const cuerpo = urls
-    .filter((u) => !u.endsWith('.html'))
+    .filter((u) => !u.endsWith('.html') && u !== '/escribir/')
     .map((u) => `  <url><loc>${base}${u}</loc></url>`)
     .join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -614,6 +643,7 @@ async function main() {
     ...paginasBlog(),
     ...paginasEntradas(),
     ...paginasCategorias(),
+    await paginaEscribir(),
     pagina404(),
   ];
 
@@ -622,6 +652,8 @@ async function main() {
   // Estáticos
   await cp(join(ROOT, 'assets'), join(OUT, 'assets'), { recursive: true });
   await cp(join(ROOT, 'src', 'main.js'), join(OUT, 'assets', 'main.js'));
+  await cp(join(ROOT, 'src', 'escribir.js'), join(OUT, 'assets', 'escribir.js'));
+  await cp(join(ROOT, 'src', 'escribir.css'), join(OUT, 'assets', 'escribir.css'));
 
   // Las @font-face van dentro de la hoja principal: una petición menos y
   // ninguna ruta absoluta que se rompa al servir el sitio en un subdirectorio.

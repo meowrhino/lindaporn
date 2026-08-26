@@ -246,6 +246,10 @@
 
   "avisoCookies": "Usamos cookies para mejorar tu experiencia en todos los sentidos.",
 
+  "_repo": "Dónde vive el código. El editor de /escribir/ publica aquí. Al traspasar el repo a otra cuenta, cambiar esta línea y nada más.",
+  "repo": "meowrhino/lindaporn",
+  "rama": "main",
+
   "_categorias": "Cada carpeta de content/entradas/ es una categoría. Aquí solo se le pone nombre bonito.",
   "categorias": {
     "blog-escort": "Blog Escort",

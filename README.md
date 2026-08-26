@@ -36,6 +36,8 @@ src/
   templates.js       Plantillas HTML. Funciones puras: datos → cadena.
   styles.css         Toda la hoja de estilos.
   main.js            Carrusel, menú, galería, aviso de cookies y formulario.
+  escribir.html/.js/.css   El editor de /escribir/. No forma parte de la web
+                     pública: es la herramienta con la que ella escribe.
 
 assets/
   img/               Las imágenes en WebP (versión grande + miniatura).
@@ -107,12 +109,50 @@ del todo con `<!-- portada: 2018/10/foto.jpg -->`.
 `npm run build` y la entrada ya está en el blog, en la portada, en el feed RSS
 y en el sitemap.
 
+### …o escribirla desde el navegador
+
+En `/escribir/` hay un editor que hace todo eso solo: título, fecha, categoría,
+texto con negrita/cursiva/enlaces y fotos. Al darle a Publicar hace **un único
+commit** con la entrada y sus imágenes, y el Action reconstruye la web.
+
+Las fotos se convierten a WebP **en el propio navegador** (`canvas.toBlob`), en
+las dos medidas que usa el sitio (1800 px y 640 px de miniatura). No hace falta
+`cwebp` ni pasar por `npm run images`: funciona igual desde el móvil.
+
+No hay servidor detrás. La página habla directamente con la API de GitHub usando
+un *fine-grained token* que se guarda en el navegador de quien escribe. La página
+está en `noindex`, fuera del sitemap y no se enlaza desde ningún sitio.
+
+Para el token: GitHub → Settings → Developer settings → Personal access tokens →
+Fine-grained tokens. Solo este repositorio, permiso **Contents: Read and write**,
+y nada más. Con eso solo se puede escribir en el contenido de esta web.
+
+Instrucciones para la clienta, en cristiano: [PARA-LINDA.md](PARA-LINDA.md).
+
+Si el repositorio cambia de cuenta, se toca **una línea**: `"repo"` en
+`content/site.json`.
+
 ---
 
 ## Publicación
 
 Cada `push` a `main` dispara [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml),
 que genera el sitio, comprueba que no haya enlaces rotos y lo publica en GitHub Pages.
+
+### Traspasar el proyecto a la cuenta de la clienta
+
+Todo está pensado para que el traspaso sea de una tarde:
+
+1. Ella se crea cuenta de GitHub.
+2. Settings → *Transfer ownership* del repositorio. Se lleva el historial, las
+   issues y las Actions; los enlaces viejos redirigen solos.
+3. En su cuenta: Settings → Pages → Source: **GitHub Actions**.
+4. Cambiar `"repo"` en `content/site.json` a `sunombre/lindaporn`.
+5. Ella se crea el fine-grained token (Contents: Read and write, solo este repo)
+   y lo pega una vez en `/escribir/`.
+
+No hay servidores, ni dominios de terceros, ni servicios de pago que traspasar:
+el proyecto entero es este repositorio.
 
 ### Para poner el dominio propio
 

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Escribir — Linda Iriane</title>
+<link rel="icon" href="{{favicon}}">
+<link rel="stylesheet" href="../assets/styles.css">
+<link rel="stylesheet" href="../assets/escribir.css">
+</head>
+<body class="escritorio">
+
+<header class="escritorio__cabecera">
+  <p class="escritorio__firma">Linda Iriane</p>
+  <button class="escritorio__salir" type="button" id="salir" hidden>Cerrar sesión</button>
+</header>
+
+<!-- Puerta: pide el token una sola vez y lo guarda en este navegador -->
+<section class="escritorio__caja" id="puerta">
+  <h1>Entrar</h1>
+  <p class="escritorio__ayuda">
+    Pega aquí tu clave de publicación. Se queda guardada en este dispositivo y no
+    vuelve a pedírtela.
+  </p>
+  <div class="campo">
+    <label for="token">Clave</label>
+    <input id="token" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…">
+  </div>
+  <p><button class="boton" type="button" id="entrar">Entrar</button></p>
+  <p class="escritorio__error" id="errorPuerta" hidden></p>
+</section>
+
+<!-- Editor -->
+<main class="escritorio__caja" id="editor" hidden>
+  <div class="escritorio__meta">
+    <div class="campo">
+      <label for="titulo">Título</label>
+      <input id="titulo" type="text" placeholder="El título de la entrada">
+    </div>
+    <div class="campo">
+      <label for="fecha">Fecha</label>
+      <input id="fecha" type="date">
+    </div>
+    <div class="campo">
+      <label for="categoria">Categoría</label>
+      <select id="categoria">{{categorias}}</select>
+    </div>
+  </div>
+
+  <div class="escritorio__barra" role="toolbar" aria-label="Formato">
+    <button type="button" data-etiqueta="strong"><b>negrita</b></button>
+    <button type="button" data-etiqueta="em"><i>cursiva</i></button>
+    <button type="button" data-accion="enlace">enlace</button>
+    <button type="button" data-accion="foto">foto</button>
+    <input type="file" id="ficheroFoto" accept="image/*" multiple hidden>
+  </div>
+
+  <div class="escritorio__hoja" id="cuerpo" contenteditable="true"
+       data-placeholder="Escribe aquí…" aria-label="Texto de la entrada"></div>
+
+  <div class="escritorio__pie">
+    <button class="boton" type="button" id="publicar">Publicar</button>
+    <p class="escritorio__estado" id="estado"></p>
+  </div>
+
+  <details class="escritorio__borrador">
+    <summary>Cómo va a quedar la dirección</summary>
+    <p><code id="ruta">…</code></p>
+  </details>
+</main>
+
+<script>window.CONFIG = { repo: '{{repo}}', rama: '{{rama}}', web: '{{web}}' };</script>
+<script src="../assets/escribir.js" type="module"></script>
+</body>
+</html>

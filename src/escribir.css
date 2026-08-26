@@ -1,0 +1,166 @@
+/* Estilos del editor. No forman parte de la web pública: solo de /escribir/. */
+
+.escritorio {
+  max-width: 52rem;
+  margin-inline: auto;
+  padding: var(--gutter);
+}
+
+.escritorio__cabecera {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 1.5rem 2.5rem;
+}
+
+.escritorio__firma {
+  font-family: var(--firma);
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.escritorio__salir {
+  font: inherit;
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--tinta-3);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  padding: 0;
+}
+
+.escritorio__salir:hover {
+  color: var(--tinta);
+}
+
+.escritorio__caja[hidden] {
+  display: none;
+}
+
+.escritorio__ayuda {
+  color: var(--tinta-2);
+  font-size: 1rem;
+  margin-block: 0.75rem 2rem;
+  max-width: 34rem;
+}
+
+.escritorio__meta {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 40rem) {
+  .escritorio__meta {
+    grid-template-columns: 1fr auto auto;
+    align-items: end;
+  }
+}
+
+.campo select {
+  width: 100%;
+  font: inherit;
+  font-size: 1.0625rem;
+  color: var(--tinta);
+  background: transparent;
+  border: 1px solid var(--linea);
+  padding: 0.85rem 1rem;
+}
+
+.escritorio__barra {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  border: 1px solid var(--linea);
+  border-bottom: 0;
+  padding: 0.6rem;
+}
+
+.escritorio__barra button {
+  font: inherit;
+  font-size: 0.95rem;
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 0.35rem 0.9rem;
+  cursor: pointer;
+  transition: border-color var(--transicion);
+}
+
+.escritorio__barra button:hover {
+  border-color: var(--linea);
+}
+
+.escritorio__hoja {
+  border: 1px solid var(--linea);
+  padding: clamp(1.25rem, 4vw, 2.5rem);
+  min-height: 24rem;
+  line-height: 1.75;
+}
+
+.escritorio__hoja:focus {
+  outline: none;
+  border-color: var(--tinta);
+}
+
+.escritorio__hoja:empty::before {
+  content: attr(data-placeholder);
+  color: var(--tinta-3);
+}
+
+.escritorio__hoja img {
+  margin-block: 1.5rem;
+}
+
+.escritorio__hoja a {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.escritorio__pie {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.escritorio__estado {
+  font-size: 1rem;
+  color: var(--tinta-2);
+}
+
+.escritorio__estado--error {
+  color: #b3261e;
+}
+
+.escritorio__error {
+  color: #b3261e;
+  font-size: 1rem;
+  margin-top: 1rem;
+}
+
+.escritorio__error[hidden] {
+  display: none;
+}
+
+.escritorio__borrador {
+  margin-top: 2.5rem;
+  font-size: 0.95rem;
+  color: var(--tinta-2);
+}
+
+.escritorio__borrador summary {
+  cursor: pointer;
+  color: var(--tinta-3);
+  font-size: 0.75rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+}
+
+.escritorio__borrador p {
+  margin-top: 0.75rem;
+}

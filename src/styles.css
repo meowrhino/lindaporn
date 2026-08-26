@@ -976,6 +976,10 @@ hr {
   margin-bottom: clamp(2rem, 5vw, 3.5rem);
 }
 
+.articulo__portada {
+  margin-bottom: 2.5rem;
+}
+
 .articulo__cuerpo > * + * {
   margin-top: 1.4em;
 }
