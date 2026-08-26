@@ -1182,6 +1182,10 @@ hr {
   color: var(--tinta-3);
 }
 
+.formulario__nota--error {
+  color: #b3261e;
+}
+
 /* Trampa antispam: invisible para personas, tentadora para bots */
 .trampa {
   position: absolute;

@@ -354,7 +354,7 @@ function paginaContacto() {
           ${dato('Dónde', c.donde.map(esc).join(',<br>'))}
         </div>
 
-        <form class="formulario" data-email="${esc(c.email)}" data-aparece>
+        <form class="formulario" data-email="${esc(c.email)}" data-endpoint="${ruta(site.endpointContacto, ctx.prefix)}" data-aparece>
           <div class="campo">
             <label for="nombre">Tu nombre</label>
             <input id="nombre" name="nombre" type="text" required autocomplete="name">

@@ -1,0 +1,33 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "lindairiane",
+  "main": "worker.js",
+  "compatibility_date": "2026-08-01",
+
+  // La web entera es estática: docs/ lo genera build.js.
+  // Las peticiones a estos ficheros no pasan por el Worker y son gratis e
+  // ilimitadas; el Worker solo se ejecuta para /api/contacto.
+  "assets": {
+    "directory": "./docs",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page"
+  },
+
+  // Enviar a una dirección verificada en Email Routing no consume cuota en
+  // ningún plan. El formulario solo escribe a Linda, así que sale gratis.
+  "send_email": [
+    {
+      "name": "EMAIL",
+      "destination_address": "lindairianescort@gmail.com"
+    }
+  ],
+
+  "vars": {
+    "REMITENTE": "web@lindairiane.com",
+    "DESTINO": "lindairianescort@gmail.com"
+  },
+
+  "observability": {
+    "enabled": true
+  }
+}

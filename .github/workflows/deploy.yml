@@ -1,8 +1,9 @@
-name: Publicar en GitHub Pages
+name: Comprobar y publicar
 
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -15,12 +16,15 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Quien publica en lindairiane.com es Cloudflare (Workers Builds, conectado
+  # al repo). Esto genera el sitio y revisa que no haya nada roto: si falla,
+  # el fallo se ve aquí y no en la web.
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
 
@@ -32,10 +36,12 @@ jobs:
         run: node tools/check.js
 
       - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: docs
 
+  # Copia de repuesto en GitHub Pages, útil mientras el dominio no apunte
+  # todavía a Cloudflare. Se puede quitar cuando esté la web en marcha.
   deploy:
     needs: build
     runs-on: ubuntu-latest

@@ -241,7 +241,7 @@
   "contacto_pagina": {
     "titulo": "Contacto",
     "subtitulo": "Linda Iriane",
-    "avisoFormulario": "Al enviar se abrirá tu programa de correo con el mensaje preparado."
+    "avisoFormulario": "Tus datos solo se usan para contestarte."
   },
 
   "avisoCookies": "Usamos cookies para mejorar tu experiencia en todos los sentidos.",
@@ -249,6 +249,9 @@
   "_repo": "Dónde vive el código. El editor de /escribir/ publica aquí. Al traspasar el repo a otra cuenta, cambiar esta línea y nada más.",
   "repo": "meowrhino/lindaporn",
   "rama": "main",
+
+  "_endpointContacto": "Lo atiende worker.js en Cloudflare. Mientras no esté desplegado, el formulario se cae solo al mailto:.",
+  "endpointContacto": "/api/contacto",
 
   "_categorias": "Cada carpeta de content/entradas/ es una categoría. Aquí solo se le pone nombre bonito.",
   "categorias": {

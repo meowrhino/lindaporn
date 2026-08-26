@@ -11,7 +11,7 @@ es Node 20 o superior, y solo porque el generador está escrito en JavaScript.
 | CSS | 2,5 MB (tema Podium + WPBakery) | 23 KB |
 | JavaScript | jQuery + Revolution Slider + Swiper + 12 plugins | 6 KB propios |
 | Dependencias | ~15 plugins, PHP, MySQL | ninguna |
-| Alojamiento | hosting con PHP | cualquier servidor de ficheros |
+| Alojamiento | hosting con PHP | Cloudflare Workers (static assets) |
 | Imágenes | JPG/PNG sin optimizar | WebP (261 imágenes, 32 MB) |
 
 110 páginas: 8 páginas fijas, 91 entradas de blog, 8 páginas de paginación, 2 categorías y un 404.
@@ -45,7 +45,9 @@ assets/
 
 tools/               Scripts de una sola vez, para traerse cosas del WordPress.
 build.js             El generador. Lee content/ + src/ y escribe docs/.
-docs/                La web generada. No se versiona: la construye GitHub Actions.
+worker.js            Lo único que corre en servidor: POST /api/contacto.
+wrangler.jsonc       Configuración del Worker de Cloudflare.
+docs/                La web generada. No se versiona: se construye al desplegar.
 ```
 
 `build.js` no depende de nada externo. Cada página se genera con rutas **relativas**,
@@ -136,36 +138,78 @@ Si el repositorio cambia de cuenta, se toca **una línea**: `"repo"` en
 
 ## Publicación
 
-Cada `push` a `main` dispara [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml),
-que genera el sitio, comprueba que no haya enlaces rotos y lo publica en GitHub Pages.
+La web se sirve desde **Cloudflare Workers con static assets**, en la cuenta de
+Linda. Un `git push` dispara Workers Builds, que ejecuta `node build.js` y
+despliega `docs/`.
 
-### Traspasar el proyecto a la cuenta de la clienta
+Los ficheros estáticos no pasan por el Worker: sus peticiones son
+[gratis e ilimitadas](https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/),
+sin coste de almacenamiento. El Worker solo se ejecuta para `/api/contacto`.
+El plan gratuito admite 20.000 ficheros por versión; la web tiene unos 650.
 
-Todo está pensado para que el traspaso sea de una tarde:
+`.github/workflows/deploy.yml` sigue existiendo, pero ya solo **comprueba**
+—genera el sitio y valida enlaces e imágenes— y mantiene una copia en GitHub
+Pages como respaldo mientras el dominio no apunte a Cloudflare. Se puede quitar
+el job `deploy` cuando la web esté en marcha.
 
-1. Ella se crea cuenta de GitHub.
-2. Settings → *Transfer ownership* del repositorio. Se lleva el historial, las
-   issues y las Actions; los enlaces viejos redirigen solos.
-3. En su cuenta: Settings → Pages → Source: **GitHub Actions**.
-4. Cambiar `"repo"` en `content/site.json` a `sunombre/lindaporn`.
-5. Ella se crea el fine-grained token (Contents: Read and write, solo este repo)
-   y lo pega una vez en `/escribir/`.
+### Poner en marcha el Worker
 
-No hay servidores, ni dominios de terceros, ni servicios de pago que traspasar:
-el proyecto entero es este repositorio.
+```bash
+npx wrangler login
+npm run deploy          # genera, comprueba y despliega
+```
 
-### Para poner el dominio propio
+Y para que se despliegue solo en cada push: en el panel de Cloudflare, el Worker
+→ Settings → Builds → Connect, y se elige el repositorio. El nombre del Worker
+en el panel tiene que coincidir con `name` en [`wrangler.jsonc`](wrangler.jsonc).
 
-1. En `content/site.json`, deja `"url": "https://lindairiane.com"` (ya está así).
-   Solo se usa para las URLs canónicas, el sitemap y el feed.
-2. Crea un fichero `assets/CNAME` con una línea: `lindairiane.com`
-3. En los DNS del dominio, apunta a GitHub Pages:
-   - `A` → `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
-   - `CNAME` para `www` → `meowrhino.github.io`
-4. En Settings → Pages del repo, escribe el dominio y marca *Enforce HTTPS*.
+### El formulario de contacto
 
-Las URLs de las entradas mantienen el formato `/AÑO/MES/DÍA/slug/` del WordPress,
-así que los enlaces y el posicionamiento existentes siguen funcionando.
+Lo atiende [`worker.js`](worker.js) en `POST /api/contacto`: valida, descarta
+bots por el campo trampa y manda el mensaje por correo con el binding
+`send_email` de Email Routing. El `Reply-To` es el visitante, así que se
+contesta dándole a responder.
+
+Enviar a una **dirección verificada** en Email Routing
+[no consume cuota en ningún plan](https://developers.cloudflare.com/email-service/platform/limits/),
+y el formulario solo escribe a Linda. Sale gratis.
+
+Hace falta, una vez:
+
+1. `lindairiane.com` como zona en Cloudflare.
+2. Email Routing activado y `lindairianescort@gmail.com` verificada como
+   dirección de destino.
+3. Que `destination_address` en `wrangler.jsonc` sea esa misma dirección.
+
+Si el Worker no existe todavía, o el envío falla, el formulario **se cae solo al
+`mailto:`** de antes: abre el correo del visitante con el mensaje escrito. Nunca
+deja de funcionar.
+
+### Puesta en marcha en la cuenta de Linda
+
+Por orden. Todo son cuentas gratuitas.
+
+1. **Cuenta de GitHub suya.** Que la cree ella, con su correo y su 2FA.
+2. **Traspasar el repositorio**: Settings → *Transfer ownership*. Se lleva el
+   historial y las Actions, y los enlaces viejos redirigen solos.
+3. **Cambiar dos líneas** en `content/site.json`: `"repo"` a `sunombre/lindaporn`.
+4. **Cuenta de Cloudflare suya** y `lindairiane.com` añadido como zona
+   (cambiar los nameservers en el registrador del dominio).
+5. **Email Routing** activado en esa zona, con `lindairianescort@gmail.com`
+   verificada como dirección de destino.
+6. **Desplegar el Worker** (`npm run deploy`) y conectarlo al repo desde
+   Settings → Builds.
+7. **Ruta del dominio**: en el Worker, Settings → Domains & Routes, añadir
+   `lindairiane.com` y `www.lindairiane.com`.
+8. **Su token de GitHub** (fine-grained, Contents: Read and write, solo ese
+   repositorio) pegado una vez en `/escribir/`.
+
+Las URLs de las entradas mantienen el formato `/AÑO/MES/DÍA/slug/` del
+WordPress, así que los enlaces y el posicionamiento existentes siguen
+funcionando.
+
+Cuando esté todo, bajar el WordPress viejo y cambiar la contraseña de
+`wp-admin`, que circuló por WhatsApp en texto plano.
 
 ---
 

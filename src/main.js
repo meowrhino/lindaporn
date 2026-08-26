@@ -154,29 +154,60 @@ function avisoCookies() {
 
 /* ---------------------------------------------------------------
    Formulario de contacto
-   Sin backend: compone un mailto: con lo que se ha escrito.
-   Para recibir los mensajes en un servidor, ver README (Formspree/Worker).
+   Lo recoge /api/contacto (worker.js) y se lo manda a Linda por correo.
+   Si ese endpoint todavía no existe —o falla—, se cae con elegancia al
+   mailto: de siempre, así que el formulario nunca deja de servir.
    --------------------------------------------------------------- */
 function formularioContacto() {
   const form = document.querySelector('.formulario');
   if (!form || !form.dataset.email) return;
 
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    if (form.querySelector('.trampa input')?.value) return; // bot
+  const aviso = form.querySelector('.formulario__nota');
+  const boton = form.querySelector('button[type="submit"]');
+  const decir = (mensaje, error = false) => {
+    if (!aviso) return;
+    aviso.textContent = mensaje;
+    aviso.classList.toggle('formulario__nota--error', error);
+  };
 
-    const datos = new FormData(form);
-    const nombre = (datos.get('nombre') || '').toString().trim();
-    const email = (datos.get('email') || '').toString().trim();
-    const mensaje = (datos.get('mensaje') || '').toString().trim();
-
-    const cuerpo = [mensaje, '', '—', nombre, email].filter(Boolean).join('\n');
-    const url =
+  const porCorreo = (datos) => {
+    const cuerpo = [datos.get('mensaje'), '', '—', datos.get('nombre'), datos.get('email')]
+      .filter(Boolean)
+      .join('\n');
+    window.location.href =
       `mailto:${form.dataset.email}` +
-      `?subject=${encodeURIComponent(`Contacto web — ${nombre || 'sin nombre'}`)}` +
+      `?subject=${encodeURIComponent(`Contacto web — ${datos.get('nombre') || 'sin nombre'}`)}` +
       `&body=${encodeURIComponent(cuerpo)}`;
+  };
 
-    window.location.href = url;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const datos = new FormData(form);
+    if (datos.get('web')) return; // trampa antispam
+
+    boton.disabled = true;
+    decir('Enviando…');
+
+    try {
+      const res = await fetch(form.dataset.endpoint, { method: 'POST', body: datos });
+
+      // Que no haya endpoint, o que el correo esté caído, no es culpa de quien
+      // escribe: se le abre su propio correo y listo. Un 400 sí es cosa suya.
+      if (res.status === 404 || res.status >= 500) throw new Error('sin endpoint');
+
+      const { mensaje } = await res.json().catch(() => ({}));
+      if (res.ok) {
+        form.reset();
+        decir(mensaje || 'Mensaje enviado.');
+      } else {
+        decir(mensaje || 'Revisa los datos y vuelve a probar.', true);
+      }
+    } catch {
+      decir('');
+      porCorreo(datos);
+    } finally {
+      boton.disabled = false;
+    }
   });
 }
 

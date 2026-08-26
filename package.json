@@ -11,6 +11,8 @@
     "build": "node build.js",
     "check": "node build.js && node tools/check.js",
     "serve": "node build.js && npx --yes serve docs -l 4321",
+    "dev": "node build.js && npx --yes wrangler dev",
+    "deploy": "node build.js && node tools/check.js && npx --yes wrangler deploy",
     "extract": "node tools/extract.js && node tools/scrape-pages.js",
     "images": "node tools/images.js",
     "fonts": "node tools/fonts.js"
