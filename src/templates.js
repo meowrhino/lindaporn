@@ -29,9 +29,11 @@ const MESES = [
   'diciembre',
 ];
 
+// Se parte la cadena a mano: new Date('2022-02-08') es medianoche UTC y en
+// según qué zona horaria mostraría el día anterior.
 export function fechaLarga(iso) {
-  const d = new Date(iso);
-  return `${d.getDate()} de ${MESES[d.getMonth()]} de ${d.getFullYear()}`;
+  const [año, mes, dia] = iso.slice(0, 10).split('-');
+  return `${Number(dia)} de ${MESES[Number(mes) - 1]} de ${año}`;
 }
 
 /* --------------------------------------------------------------- */
@@ -132,22 +134,10 @@ function pie(site, ctx) {
     </footer>`;
 }
 
-function avisos(site, ctx) {
+function avisoCookies(site, ctx) {
   return `
-    <div class="edad" hidden role="dialog" aria-modal="true" aria-labelledby="edad-titulo">
-      <div class="edad__caja">
-        <p class="edad__firma">${esc(site.titulo)}</p>
-        <h1 id="edad-titulo" style="font-size:1.5rem">Esta web contiene material para adultos</h1>
-        <p style="margin-top:1rem;color:var(--tinta-2)">Para entrar tienes que ser mayor de 18 años.</p>
-        <div class="edad__acciones">
-          <button class="boton" type="button" data-edad="si">Tengo 18 años o más</button>
-          <a class="boton" href="https://www.google.com" rel="noopener">Salir</a>
-        </div>
-      </div>
-    </div>
-
     <div class="cookies-aviso" hidden>
-      <p>${esc(site.cookies.banner)} <a href="${ruta('/cookies/', ctx.prefix)}">+ info</a></p>
+      <p>${esc(site.avisoCookies)} <a href="${ruta('/cookies/', ctx.prefix)}">+ info</a></p>
       <button class="cookies-aviso__aceptar" type="button">Aceptar</button>
     </div>`;
 }
@@ -193,7 +183,7 @@ ${contenido}
 </main>
 ${pie(site, ctx)}
 </div>
-${avisos(site, ctx)}
+${avisoCookies(site, ctx)}
 <script src="${ruta('/assets/main.js', ctx.prefix)}" defer></script>
 </body>
 </html>
@@ -203,26 +193,29 @@ ${avisos(site, ctx)}
 /* ---------------------------------------------------------------
    Piezas reutilizables
    --------------------------------------------------------------- */
-export function rotulo({ sobre, titulo, nivel = 2 }) {
+// El sc_title del tema original ponía el título y debajo el subtítulo
+// en versalitas espaciadas. Mismo orden aquí.
+export function rotulo({ titulo, subtitulo, nivel = 2 }) {
   return `<div class="rotulo" data-aparece>
-    ${sobre ? `<p class="rotulo__sobre">${esc(sobre)}</p>` : ''}
     <h${nivel} class="rotulo__titulo">${esc(titulo)}</h${nivel}>
+    ${subtitulo ? `<p class="rotulo__sub">${esc(subtitulo)}</p>` : ''}
   </div>`;
 }
 
-export function tarjetaEntrada(post, ctx, img) {
-  const portada = img(post.featured);
+export function tarjetaEntrada(entrada, ctx, img) {
+  const portada = img(entrada.portada);
+  const enlace = ruta(entrada.permalink, ctx.prefix);
   return `<article class="entrada-tarjeta" data-aparece>
     ${
       portada
-        ? `<a class="entrada-tarjeta__media" href="${ruta(post.permalink, ctx.prefix)}">
+        ? `<a class="entrada-tarjeta__media" href="${enlace}" tabindex="-1" aria-hidden="true">
              <img src="${ruta(portada.thumb, ctx.prefix)}" alt="" loading="lazy" decoding="async">
            </a>`
         : ''
     }
-    <p class="entrada-tarjeta__fecha">${fechaLarga(post.date)}</p>
-    <h3 class="entrada-tarjeta__titulo"><a href="${ruta(post.permalink, ctx.prefix)}">${esc(post.title)}</a></h3>
-    <p class="entrada-tarjeta__resumen">${esc(post.excerpt)}…</p>
+    <p class="entrada-tarjeta__fecha">${fechaLarga(entrada.fecha)}</p>
+    <h3 class="entrada-tarjeta__titulo"><a href="${enlace}">${esc(entrada.titulo)}</a></h3>
+    <p class="entrada-tarjeta__resumen">${esc(entrada.resumen)}</p>
   </article>`;
 }
 

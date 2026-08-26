@@ -28,9 +28,65 @@ const leer = async (f) => JSON.parse(await readFile(join(ROOT, 'content', f), 'u
 /* --------------------------------------------------------------- */
 
 const site = await leer('site.json');
-const posts = await leer('posts.json');
-const categorias = await leer('categories.json');
+const paginasWp = await leer('pages.json');
 const imagenes = await leer('images.json');
+
+const RECIENTES = 5; // entradas que muestra la barra lateral, como el widget original
+
+/* ---------------------------------------------------------------
+   Las entradas del blog
+   Un fichero por entrada en content/entradas/<categoria>/<fecha>_<slug>.html:
+   la categoría es la carpeta, la fecha y el slug son el nombre, el título es
+   el primer <h1> y la miniatura, la primera imagen del texto.
+   --------------------------------------------------------------- */
+async function leerEntradas() {
+  const raiz = join(ROOT, 'content', 'entradas');
+  const entradas = [];
+
+  for (const carpeta of await readdir(raiz, { withFileTypes: true })) {
+    if (!carpeta.isDirectory()) continue;
+
+    for (const fichero of await readdir(join(raiz, carpeta.name))) {
+      if (!fichero.endsWith('.html')) continue;
+
+      const nombre = fichero.match(/^(\d{4})-(\d{2})-(\d{2})_(.+)\.html$/);
+      if (!nombre) throw new Error(`Nombre inesperado: ${carpeta.name}/${fichero}. Formato: AAAA-MM-DD_slug.html`);
+      const [, año, mes, dia, slug] = nombre;
+
+      let html = await readFile(join(raiz, carpeta.name, fichero), 'utf8');
+
+      const portada = html.match(/^<!--\s*portada:\s*(.+?)\s*-->/m)?.[1] || null;
+      const titulo = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1]?.trim();
+      if (!titulo) throw new Error(`Falta el <h1> con el título en ${carpeta.name}/${fichero}`);
+
+      html = html.replace(/^<!--\s*portada:.*?-->\s*/m, '').replace(/<h1[^>]*>[\s\S]*?<\/h1>\s*/i, '');
+
+      entradas.push({
+        slug,
+        categoria: carpeta.name,
+        titulo,
+        fecha: `${año}-${mes}-${dia}`,
+        permalink: `/${año}/${mes}/${dia}/${slug}/`,
+        portada: portada || html.match(/<img[^>]+src="([^"]+)"/i)?.[1] || null,
+        resumen: resumir(html),
+        html: html.trim(),
+      });
+    }
+  }
+
+  return entradas.sort((a, b) => b.fecha.localeCompare(a.fecha) || a.slug.localeCompare(b.slug));
+}
+
+function resumir(html, largo = 220) {
+  const texto = html
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return texto.length > largo ? `${texto.slice(0, largo).trimEnd()}…` : texto;
+}
+
+const posts = await leerEntradas();
 
 // '2018/10/foto.jpg', una URL absoluta o una variante -240x359: todo apunta al mismo sitio.
 function img(ref) {
@@ -84,6 +140,15 @@ function limpiarHtml(html, ctx) {
   return out.trim();
 }
 
+// Las páginas guardadas en WordPress traen los shortcodes de WPBakery
+// ([vc_row], [vc_column_text]…) alrededor del HTML de verdad. Fuera.
+function quitarShortcodes(html) {
+  return html
+    .replace(/\[\/?vc_[^\]]*\]/g, '')
+    .replace(/\[\/?(?:rev_slider_vc|trx_sc_\w+)[^\]]*\]/g, '')
+    .replace(/<p>\s*<\/p>/g, '');
+}
+
 /* ---------------------------------------------------------------
    Páginas
    --------------------------------------------------------------- */
@@ -91,17 +156,18 @@ function limpiarHtml(html, ctx) {
 function paginaHome() {
   const ctx = ctxDe('/');
   const h = site.home;
-  const recientes = posts.slice(0, 3);
+  const recientes = posts.slice(0, 9); // las mismas nueve que traía el carrusel original
 
   const slides = site.hero
     .map((s, i) => {
       const foto = img(s.imagen);
-      return `<div class="hero__slide" data-activa="${i === 0}" aria-hidden="${i !== 0}">
+      const claro = s.texto === 'claro';
+      return `<div class="hero__slide" data-activa="${i === 0}" data-texto="${esc(s.texto || 'oscuro')}" aria-hidden="${i !== 0}">
         ${foto ? `<img class="hero__img" src="${ruta(foto.big, ctx.prefix)}" alt="" ${i === 0 ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">` : ''}
         <div class="contenedor hero__texto">
-          <p class="hero__sub">${esc(s.subtitulo)}</p>
           <h1 class="hero__titulo">${esc(s.titulo)}</h1>
-          <p><a class="boton boton--claro" href="${ruta(s.url, ctx.prefix)}">${esc(s.boton)}</a></p>
+          <p class="hero__nombre">${esc(s.subtitulo)}</p>
+          <a class="boton${claro ? ' boton--claro' : ''}" href="${ruta(s.url, ctx.prefix)}">${esc(s.boton)}</a>
         </div>
       </div>`;
     })
@@ -124,7 +190,7 @@ function paginaHome() {
 
   <section class="seccion">
     <div class="contenedor">
-      ${rotulo({ sobre: h.intro.subtitulo, titulo: h.intro.titulo })}
+      ${rotulo({ titulo: h.intro.titulo, subtitulo: h.intro.subtitulo })}
       <div data-aparece>${h.intro.parrafos.map((p) => `<p>${p}</p>`).join('')}</div>
     </div>
   </section>
@@ -132,10 +198,10 @@ function paginaHome() {
   <section class="seccion seccion--compacta">
     <div class="contenedor dos-columnas">
       <div data-aparece>
-        <p>${h.bio.texto}</p>
+        <p class="destacado">${h.bio.texto}</p>
         <p style="margin-top:2rem"><a class="boton" href="${ruta(h.bio.boton.url, ctx.prefix)}">${esc(h.bio.boton.texto)}</a></p>
       </div>
-      ${retrato ? `<img src="${ruta(retrato.big, ctx.prefix)}" alt="Linda Iriane" loading="lazy" decoding="async" data-aparece>` : ''}
+      ${retrato ? `<img src="${ruta(retrato.big, ctx.prefix)}" alt="" loading="lazy" decoding="async" data-aparece>` : ''}
     </div>
   </section>
 
@@ -147,34 +213,30 @@ function paginaHome() {
 
   <section class="seccion">
     <div class="contenedor">
-      ${rotulo({ sobre: 'Blog escort', titulo: 'Sex & Art' })}
-      <div class="entradas">${recientes.map((p) => tarjetaEntrada(p, ctx, img)).join('')}</div>
-      <p style="margin-top:3rem"><a class="boton" href="${ruta('/sex-and-art/', ctx.prefix)}">Ver todas las entradas</a></p>
+      ${rotulo({ titulo: 'Sex & Art', subtitulo: 'Blog Escort' })}
+      <div class="entradas entradas--carrusel">${recientes.map((p) => tarjetaEntrada(p, ctx, img)).join('')}</div>
     </div>
   </section>
 
-  <section class="seccion seccion--compacta">
+  <section class="seccion franja-negra">
     <div class="contenedor">
-      <p class="cita" data-aparece>${esc(h.cita)}</p>
+      <p class="destacado" data-aparece>${h.cita}</p>
     </div>
   </section>
 
-  <section class="seccion">
-    <div class="contenedor llamadas">
-      ${h.llamadas
-        .map((c) => {
-          const foto = img(c.imagen);
-          return `<a class="llamada" href="${ruta(c.url, ctx.prefix)}" data-aparece>
-            ${foto ? `<img src="${ruta(foto.big, ctx.prefix)}" alt="" loading="lazy" decoding="async">` : ''}
-            <span class="llamada__texto">
-              <span class="llamada__sobre">${esc(c.subtitulo)}</span>
-              <span style="font-size:2rem;line-height:1.1">${esc(c.titulo)}</span>
-            </span>
-          </a>`;
-        })
-        .join('')}
-    </div>
-  </section>`;
+  <div class="llamadas">
+    ${h.llamadas
+      .map((c) => {
+        const foto = img(c.imagen);
+        return `<section class="llamada${foto ? '' : ' llamada--oscura'}" data-aparece>
+          ${foto ? `<img class="llamada__fondo" src="${ruta(foto.big, ctx.prefix)}" alt="" loading="lazy" decoding="async">` : ''}
+          ${c.subtitulo ? `<p class="llamada__sub">${esc(c.subtitulo)}</p>` : ''}
+          <h3 class="llamada__titulo">${esc(c.titulo)}</h3>
+          <a class="boton boton--claro" href="${ruta(c.url, ctx.prefix)}">${esc(c.boton)}</a>
+        </section>`;
+      })
+      .join('')}
+  </div>`;
 
   return {
     url: '/',
@@ -196,7 +258,7 @@ function paginaTarifas(clave, url) {
   const contenido = `
   ${
     portada
-      ? `<section class="hero" style="min-height:clamp(20rem,45vh,28rem)">
+      ? `<section class="hero hero--interior">
       <div class="hero__slide" data-activa="true">
         <img class="hero__img" src="${ruta(portada.big, ctx.prefix)}" alt="" fetchpriority="high" decoding="async">
         <div class="contenedor hero__texto">
@@ -210,11 +272,11 @@ function paginaTarifas(clave, url) {
 
   <section class="seccion">
     <div class="contenedor">
-      ${rotulo({ sobre: d.subtitulo, titulo: 'Precios' })}
-      ${d.intro ? `<p style="max-width:52rem;margin-bottom:3rem" data-aparece>${esc(d.intro)}</p>` : ''}
+      ${rotulo({ titulo: d.titulo, subtitulo: d.subtitulo, nivel: 1 })}
+      ${d.intro ? `<p class="destacado" style="max-width:52rem;margin-bottom:3rem" data-aparece>${esc(d.intro)}</p>` : ''}
       ${bloquesTarifas(d.bloques, ctx)}
       <p style="margin-top:3rem;color:var(--tinta-2)" data-aparece>${esc(d.pie)}</p>
-      <p style="margin-top:2rem"><a class="boton" href="${ruta('/contacto/', ctx.prefix)}">Contacta conmigo</a></p>
+      <p style="margin-top:2rem"><a class="boton" href="${ruta('/contacto/', ctx.prefix)}">contacta conmigo</a></p>
     </div>
   </section>`;
 
@@ -240,8 +302,8 @@ function paginaGaleria(clave) {
   const contenido = `
   <section class="seccion">
     <div class="contenedor">
-      ${rotulo({ sobre: site.eslogan, titulo: g.titulo, nivel: 1 })}
-      ${g.intro ? `<p style="max-width:52rem;margin-bottom:3rem" data-aparece>${esc(g.intro)}</p>` : ''}
+      ${rotulo({ titulo: g.titulo, subtitulo: site.eslogan, nivel: 1 })}
+      ${g.intro ? `<p class="destacado" style="max-width:52rem;margin-bottom:3rem" data-aparece>${esc(g.intro)}</p>` : ''}
       ${galeria(g.fotos, ctx, img)}
     </div>
   </section>`;
@@ -271,7 +333,7 @@ function paginaContacto() {
   const contenido = `
   <section class="seccion">
     <div class="contenedor">
-      ${rotulo({ sobre: p.subtitulo, titulo: p.titulo, nivel: 1 })}
+      ${rotulo({ titulo: p.titulo, subtitulo: p.subtitulo, nivel: 1 })}
       <div class="contacto-rejilla">
         <div data-aparece>
           ${dato('Teléfono', `<a href="tel:${esc(c.telefonoRaw)}">${esc(c.telefono)}</a>`)}
@@ -281,7 +343,6 @@ function paginaContacto() {
         </div>
 
         <form class="formulario" data-email="${esc(c.email)}" data-aparece>
-          <p>${esc(p.textoFormulario)}</p>
           <div class="campo">
             <label for="nombre">Tu nombre</label>
             <input id="nombre" name="nombre" type="text" required autocomplete="name">
@@ -321,20 +382,41 @@ function paginaContacto() {
   };
 }
 
-function paginaTexto(clave, url, titulo) {
+// Cookies y Nota legal: el texto que ya había en WordPress, sin retocar.
+function paginaWp({ slug, titulo, url }) {
   const ctx = ctxDe(url);
-  const d = site[clave];
+  const pagina = paginasWp.find((p) => p.slug === slug);
+  const cuerpo = limpiarHtml(quitarShortcodes(pagina?.html || ''), ctx);
+
   const contenido = `
   <section class="seccion">
     <div class="contenedor articulo">
-      ${rotulo({ titulo: d.titulo, nivel: 1 })}
-      <div class="articulo__cuerpo">${d.parrafos.map((p) => `<p>${p}</p>`).join('')}</div>
+      ${cuerpo.includes('<h2') ? '' : rotulo({ titulo, nivel: 1 })}
+      <div class="articulo__cuerpo">${cuerpo}</div>
     </div>
   </section>`;
   return { url, html: layout({ site, ctx, contenido, titulo }) };
 }
 
 /* --- Blog --- */
+
+// El widget «Entradas Recientes» que llevaba la barra lateral del tema.
+function barraLateral(ctx) {
+  const items = posts
+    .slice(0, RECIENTES)
+    .map(
+      (p) => `<li>
+        <span class="recientes__fecha">${fechaLarga(p.fecha)}</span>
+        <a href="${ruta(p.permalink, ctx.prefix)}">${esc(p.titulo)}</a>
+      </li>`,
+    )
+    .join('');
+
+  return `<aside class="lateral">
+    <h2 class="lateral__titulo">Entradas recientes</h2>
+    <ul class="recientes">${items}</ul>
+  </aside>`;
+}
 
 function paginasBlog() {
   const salida = [];
@@ -347,10 +429,13 @@ function paginasBlog() {
 
     const contenido = `
     <section class="seccion">
-      <div class="contenedor">
-        ${rotulo({ sobre: 'Blog escort', titulo: 'Sex & Art', nivel: 1 })}
-        <div class="entradas">${lote.map((p) => tarjetaEntrada(p, ctx, img)).join('')}</div>
-        ${paginacion(n, total, '/sex-and-art/', ctx)}
+      <div class="contenedor con-lateral">
+        <div>
+          ${rotulo({ titulo: 'Sex & Art', subtitulo: 'Blog Escort', nivel: 1 })}
+          <div class="entradas">${lote.map((p) => tarjetaEntrada(p, ctx, img)).join('')}</div>
+          ${paginacion(n, total, '/sex-and-art/', ctx)}
+        </div>
+        ${barraLateral(ctx)}
       </div>
     </section>`;
 
@@ -369,41 +454,28 @@ function paginasBlog() {
 }
 
 function paginasEntradas() {
-  return posts.map((post, i) => {
+  return posts.map((post) => {
     const ctx = ctxDe(post.permalink, { tipo: 'article' });
-    const anterior = posts[i + 1]; // posts va de más nuevo a más viejo
-    const siguiente = posts[i - 1];
-    const portada = img(post.featured);
-
-    const nav = `<nav class="entrada-nav">
-      ${
-        anterior
-          ? `<a href="${ruta(anterior.permalink, ctx.prefix)}"><span class="entrada-nav__etiqueta">Anterior</span>${esc(anterior.title)}</a>`
-          : '<span></span>'
-      }
-      ${
-        siguiente
-          ? `<a href="${ruta(siguiente.permalink, ctx.prefix)}"><span class="entrada-nav__etiqueta">Siguiente</span>${esc(siguiente.title)}</a>`
-          : '<span></span>'
-      }
-    </nav>`;
+    const portada = img(post.portada);
 
     const contenido = `
-    <article class="seccion">
-      <div class="contenedor articulo">
-        <header class="articulo__cabecera">
-          <p class="entrada__fecha">${fechaLarga(post.date)}</p>
-          <h1>${esc(post.title)}</h1>
-        </header>
-        ${
-          portada
-            ? `<img src="${ruta(portada.big, ctx.prefix)}" alt="" style="margin-bottom:2.5rem" loading="lazy" decoding="async">`
-            : ''
-        }
-        <div class="articulo__cuerpo">${limpiarHtml(post.html, ctx)}</div>
-        ${nav}
+    <section class="seccion">
+      <div class="contenedor con-lateral">
+        <article class="articulo">
+          <header class="articulo__cabecera">
+            <p class="entrada__fecha">${fechaLarga(post.fecha)}</p>
+            <h1>${esc(post.titulo)}</h1>
+          </header>
+          ${
+            portada
+              ? `<img src="${ruta(portada.big, ctx.prefix)}" alt="" style="margin-bottom:2.5rem" loading="lazy" decoding="async">`
+              : ''
+          }
+          <div class="articulo__cuerpo">${limpiarHtml(post.html, ctx)}</div>
+        </article>
+        ${barraLateral(ctx)}
       </div>
-    </article>`;
+    </section>`;
 
     return {
       url: post.permalink,
@@ -411,8 +483,8 @@ function paginasEntradas() {
         site,
         ctx,
         contenido,
-        titulo: post.title,
-        descripcion: post.excerpt.slice(0, 160),
+        titulo: post.titulo,
+        descripcion: post.resumen,
         imagen: portada?.big,
       }),
     };
@@ -420,26 +492,30 @@ function paginasEntradas() {
 }
 
 function paginasCategorias() {
-  return categorias
-    .filter((c) => c.count > 0)
-    .map((cat) => {
-      const url = `/categoria/${cat.slug}/`;
-      const ctx = ctxDe(url);
-      const lote = posts.filter((p) => p.categories.includes(cat.id));
+  const slugs = [...new Set(posts.map((p) => p.categoria))];
 
-      const contenido = `
-      <section class="seccion">
-        <div class="contenedor">
-          ${rotulo({ sobre: 'Categoría', titulo: cat.name, nivel: 1 })}
+  return slugs.map((slug) => {
+    const nombre = site.categorias[slug] || slug;
+    const url = `/categoria/${slug}/`;
+    const ctx = ctxDe(url);
+    const lote = posts.filter((p) => p.categoria === slug);
+
+    const contenido = `
+    <section class="seccion">
+      <div class="contenedor con-lateral">
+        <div>
+          ${rotulo({ titulo: nombre, subtitulo: 'Categoría', nivel: 1 })}
           <div class="entradas">${lote.map((p) => tarjetaEntrada(p, ctx, img)).join('')}</div>
         </div>
-      </section>`;
+        ${barraLateral(ctx)}
+      </div>
+    </section>`;
 
-      return {
-        url,
-        html: layout({ site, ctx, contenido, titulo: cat.name, descripcion: `Entradas en ${cat.name}.` }),
-      };
-    });
+    return {
+      url,
+      html: layout({ site, ctx, contenido, titulo: nombre, descripcion: `Entradas en ${nombre}.` }),
+    };
+  });
 }
 
 function pagina404() {
@@ -465,11 +541,11 @@ function feed() {
     .slice(0, 30)
     .map(
       (p) => `  <item>
-    <title>${esc(p.title)}</title>
+    <title>${esc(p.titulo)}</title>
     <link>${base}${p.permalink}</link>
     <guid isPermaLink="true">${base}${p.permalink}</guid>
-    <pubDate>${new Date(p.date).toUTCString()}</pubDate>
-    <description>${esc(p.excerpt)}</description>
+    <pubDate>${new Date(`${p.fecha}T12:00:00Z`).toUTCString()}</pubDate>
+    <description>${esc(p.resumen)}</description>
   </item>`,
     )
     .join('\n');
@@ -534,8 +610,7 @@ async function main() {
     paginaGaleria('ultimas-fotos'),
     paginaGaleria('mis-fotos'),
     paginaContacto(),
-    paginaTexto('cookies', '/cookies/', 'Cookies'),
-    paginaTexto('notaLegal', '/nota-legal/', 'Nota legal'),
+    ...site.paginasWp.map(paginaWp),
     ...paginasBlog(),
     ...paginasEntradas(),
     ...paginasCategorias(),
@@ -565,7 +640,7 @@ async function main() {
 
   const peso = await pesar(OUT);
   console.log(`${paginas.length} páginas generadas en docs/`);
-  console.log(`  ${posts.length} entradas · ${categorias.length} categorías`);
+  console.log(`  ${posts.length} entradas · ${new Set(posts.map((p) => p.categoria)).size} categorías`);
   console.log(`  peso total: ${(peso / 1024 / 1024).toFixed(1)} MB`);
 }
 

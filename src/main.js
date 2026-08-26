@@ -153,36 +153,6 @@ function avisoCookies() {
 }
 
 /* ---------------------------------------------------------------
-   Confirmación de mayoría de edad
-   --------------------------------------------------------------- */
-function avisoEdad() {
-  const puerta = document.querySelector('.edad');
-  if (!puerta) return;
-  const CLAVE = 'li-edad-ok';
-
-  let confirmado = false;
-  try {
-    confirmado = localStorage.getItem(CLAVE) === '1';
-  } catch {
-    confirmado = true; // sin almacenamiento, no bloqueamos la web
-  }
-  if (confirmado) return;
-
-  puerta.hidden = false;
-  document.body.style.overflow = 'hidden';
-
-  puerta.querySelector('[data-edad="si"]')?.addEventListener('click', () => {
-    try {
-      localStorage.setItem(CLAVE, '1');
-    } catch {
-      /* sin almacenamiento: se volverá a preguntar en la próxima visita */
-    }
-    puerta.hidden = true;
-    document.body.style.overflow = '';
-  });
-}
-
-/* ---------------------------------------------------------------
    Formulario de contacto
    Sin backend: compone un mailto: con lo que se ha escrito.
    Para recibir los mensajes en un servidor, ver README (Formspree/Worker).
@@ -248,7 +218,6 @@ for (const arranca of [
   heroCarrusel,
   visorGaleria,
   avisoCookies,
-  avisoEdad,
   formularioContacto,
   apariciones,
 ]) {

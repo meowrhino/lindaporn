@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Vuelca el contenido del WordPress original a JSON.
 // Se ejecuta una vez (o cada vez que quieras resincronizar): node tools/extract.js
-// A partir de aquí, content/*.json es la fuente de verdad y el WP sobra.
+// A partir de aquí, content/ es la fuente de verdad y el WP sobra.
 
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -63,8 +63,6 @@ const decode = (s = '') =>
     .replace(/&rsquo;/g, '’')
     .replace(/&8211;|&#8211;/g, '–');
 
-const stripTags = (html = '') => decode(html.replace(/<[^>]*>/g, '')).replace(/\s+/g, ' ').trim();
-
 // De https://lindairiane.com/2019/01/10/adelitas/ saco "adelitas".
 const slugFromLink = (link) => link.replace(/\/$/, '').split('/').pop();
 
@@ -81,20 +79,6 @@ async function main() {
   ]);
 
   const mediaById = new Map(media.map((m) => [m.id, m]));
-
-  const normPost = (p) => ({
-    id: p.id,
-    slug: p.slug || slugFromLink(p.link),
-    title: decode(p.title?.rendered || ''),
-    date: p.date,
-    modified: p.modified,
-    // La ruta original era /YYYY/MM/DD/slug/ — la conservo para no romper enlaces ni SEO.
-    permalink: p.link.replace(ORIGIN, '') || `/${p.slug}/`,
-    categories: p.categories || [],
-    excerpt: stripTags(p.excerpt?.rendered || '').slice(0, 300),
-    html: p.content?.rendered || '',
-    featured: p.featured_media ? mediaById.get(p.featured_media)?.source_url || null : null,
-  });
 
   const normPage = (p) => ({
     id: p.id,
@@ -117,21 +101,8 @@ async function main() {
   });
 
   const files = {
-    'posts.json': posts.map(normPost).sort((a, b) => b.date.localeCompare(a.date)),
     'pages.json': pages.map(normPage).sort((a, b) => a.menuOrder - b.menuOrder),
     'media.json': media.map(normMedia),
-    'categories.json': categories.map((c) => ({
-      id: c.id,
-      slug: c.slug,
-      name: decode(c.name),
-      count: c.count,
-    })),
-    'testimonials.json': testimonials.map((t) => ({
-      id: t.id,
-      slug: t.slug,
-      name: decode(t.title?.rendered || ''),
-      html: t.content?.rendered || '',
-    })),
   };
 
   for (const [name, data] of Object.entries(files)) {
@@ -139,6 +110,29 @@ async function main() {
     console.log(`  → content/${name} (${data.length})`);
   }
 
+  // Cada entrada, a su propio fichero: content/entradas/<categoria>/<fecha>_<slug>.html
+  const slugCategoria = new Map(categories.map((c) => [c.id, c.slug]));
+  for (const p of posts) {
+    const categoria = slugCategoria.get(p.categories?.[0]) || 'uncategorized';
+    const slug = p.slug || slugFromLink(p.link);
+    const html = p.content?.rendered || '';
+    const destacada = p.featured_media ? mediaById.get(p.featured_media)?.source_url : null;
+
+    // La miniatura sale de la primera imagen del texto; solo si la destacada
+    // no aparece en él hace falta declararla arriba.
+    const rel = destacada?.split('/uploads/')[1];
+    const cabecera = rel && !html.includes(rel) ? `<!-- portada: ${rel} -->\n` : '';
+
+    const carpeta = join(OUT, 'entradas', categoria);
+    await mkdir(carpeta, { recursive: true });
+    await writeFile(
+      join(carpeta, `${p.date.slice(0, 10)}_${slug}.html`),
+      `${cabecera}<h1>${decode(p.title?.rendered || slug)}</h1>\n\n${html.trim()}\n`,
+    );
+  }
+  console.log(`  → content/entradas/ (${posts.length} ficheros)`);
+
+  if (testimonials.length) console.log(`  ${testimonials.length} testimonios sin usar`);
   console.log('\nListo.');
 }
 

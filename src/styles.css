@@ -9,6 +9,7 @@
 
 :root {
   --tinta: #191919;
+  --negro: #0a0a0a;
   --tinta-2: #5c5c5c;
   --tinta-3: #a8a8a8;
   --hover: #c0bebe;
@@ -203,18 +204,18 @@ hr {
   padding-block: clamp(2.5rem, 5vw, 4rem);
 }
 
-/* Encabezado de sección: título grande + antetítulo en versalitas */
-.rotulo__sobre {
+/* Encabezado de sección: título grande y debajo el subtítulo en versalitas */
+.rotulo {
+  margin-bottom: 2rem;
+}
+
+.rotulo__sub {
   font-size: 0.75rem;
   letter-spacing: 0.42em;
   text-transform: uppercase;
   color: var(--tinta-3);
   font-weight: 500;
-  margin-bottom: 0.9rem;
-}
-
-.rotulo__titulo {
-  margin-bottom: 1.5rem;
+  margin-top: 0.9rem;
 }
 
 /* --- Botón --- */
@@ -508,10 +509,20 @@ hr {
 /* ---------------------------------------------------------------
    Hero / carrusel de portada
    --------------------------------------------------------------- */
+/* Las fotos del carrusel son 1920×800 y llevan la composición dentro
+   (el marco, las fotos superpuestas y el hueco claro para el texto).
+   Respetando esa proporción no se recortan y el texto cae donde debe. */
 .hero {
   position: relative;
-  min-height: clamp(30rem, 78vh, 46rem);
+  aspect-ratio: 12 / 5;
+  min-height: 26rem;
   overflow: hidden;
+}
+
+/* Las cabeceras de servicios y BDSM son banners más bajos. */
+.hero--interior {
+  aspect-ratio: 16 / 5;
+  min-height: 20rem;
 }
 
 .hero__slide {
@@ -527,20 +538,28 @@ hr {
   pointer-events: auto;
 }
 
+/* Las fotos del carrusel ya vienen compuestas y en blanco y negro:
+   el texto va en negro encima de la parte clara, como en el original. */
 .hero__img {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: grayscale(100%);
 }
 
-.hero__slide::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, rgb(0 0 0 / 55%) 0%, rgb(0 0 0 / 15%) 60%, transparent 100%);
+/* Zoom lentísimo, el «ken burns» que traía el slider original. */
+.hero__slide[data-activa='true'] .hero__img {
+  animation: hero-zoom 10s linear forwards;
+}
+
+@keyframes hero-zoom {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.1);
+  }
 }
 
 .hero__texto {
@@ -550,23 +569,27 @@ hr {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  color: var(--papel);
+  align-items: flex-start;
   padding-block: 5rem;
 }
 
-.hero__sub {
-  font-family: var(--firma);
-  font-size: clamp(2.5rem, 4vw, 3.5rem);
-  line-height: 1;
-  margin-bottom: 0.5rem;
+/* Cada foto pide un color: la de la playa es oscura, las otras dos claras. */
+.hero__slide[data-texto='claro'] {
+  color: var(--papel);
 }
 
 .hero__titulo {
   text-transform: uppercase;
   font-weight: 500;
   letter-spacing: -0.015em;
-  max-width: 16ch;
-  margin-bottom: 2rem;
+  max-width: 14ch;
+}
+
+.hero__nombre {
+  font-family: var(--firma);
+  font-size: clamp(2.5rem, 4vw, 3.5rem);
+  line-height: 1;
+  margin-block: 0.75rem 1.75rem;
 }
 
 .hero__nav {
@@ -585,13 +608,13 @@ hr {
   height: 2px;
   border: 0;
   padding: 0;
-  background: rgb(255 255 255 / 45%);
+  background: rgb(25 25 25 / 25%);
   cursor: pointer;
   transition: background var(--transicion);
 }
 
 .hero__punto[aria-selected='true'] {
-  background: var(--papel);
+  background: var(--tinta);
 }
 
 /* ---------------------------------------------------------------
@@ -613,29 +636,30 @@ hr {
   }
 }
 
+/* Franjas oscuras a ancho completo, como los vc_row scheme=dark */
 .franja-oscura {
   background: var(--tinta);
   color: var(--papel);
 }
 
-.franja-oscura a {
+.franja-negra {
+  background: var(--negro);
   color: var(--papel);
 }
 
-.cita {
-  font-size: clamp(1.25rem, 1.6vw, 1.6rem);
-  line-height: 1.6;
-  font-style: italic;
-  color: var(--tinta-2);
-  max-width: 54rem;
-  margin-inline: auto;
-  text-align: center;
+.franja-oscura a,
+.franja-negra a {
+  color: var(--papel);
 }
 
-/* Tarjetas grandes de llamada a la acción */
+.destacado {
+  font-size: clamp(1.25rem, 1.6vw, 1.6rem);
+  line-height: 1.6;
+}
+
+/* Bloques «conoce mis servicios» / «sex & art» del final de la home */
 .llamadas {
   display: grid;
-  gap: 1.5rem;
   grid-template-columns: 1fr;
 }
 
@@ -647,59 +671,68 @@ hr {
 
 .llamada {
   position: relative;
-  display: block;
-  min-height: 22rem;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  gap: 0.4rem;
+  min-height: 24rem;
+  padding: 3rem 2rem;
   overflow: hidden;
+}
+
+.llamada--oscura {
+  background: var(--tinta);
   color: var(--papel);
 }
 
-.llamada img {
+.llamada__fondo {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: grayscale(100%);
   transition: transform 0.8s ease;
 }
 
-.llamada::after {
+.llamada:has(.llamada__fondo) {
+  color: var(--papel);
+}
+
+.llamada:has(.llamada__fondo)::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgb(0 0 0 / 40%);
+  background: rgb(0 0 0 / 35%);
   transition: background var(--transicion);
 }
 
-.llamada:hover img {
+.llamada:hover .llamada__fondo {
   transform: scale(1.05);
 }
 
 .llamada:hover::after {
-  background: rgb(0 0 0 / 25%);
+  background: rgb(0 0 0 / 20%);
 }
 
-.llamada:hover {
-  color: var(--papel);
-}
-
-.llamada__texto {
+.llamada > *:not(.llamada__fondo) {
   position: relative;
   z-index: 2;
-  height: 100%;
-  min-height: inherit;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 2.5rem;
 }
 
-.llamada__sobre {
+.llamada__sub {
   font-size: 0.75rem;
   letter-spacing: 0.4em;
   text-transform: uppercase;
-  opacity: 0.8;
-  margin-bottom: 0.5rem;
+  opacity: 0.75;
+}
+
+.llamada__titulo {
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+}
+
+.llamada .boton {
+  justify-self: center;
+  margin-top: 1.5rem;
 }
 
 /* ---------------------------------------------------------------
@@ -785,15 +818,11 @@ hr {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: grayscale(100%);
-  transition:
-    transform 0.6s ease,
-    filter var(--transicion);
+  transition: transform 0.6s ease;
 }
 
 .galeria__item:hover img {
   transform: scale(1.04);
-  filter: grayscale(0%);
 }
 
 /* Visor a pantalla completa */
@@ -870,6 +899,28 @@ hr {
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
 }
 
+/* Carrusel horizontal de la home: mismo scroll nativo, sin JavaScript. */
+.entradas--carrusel {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(min(100%, 19rem), 1fr);
+  gap: 1.5rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 1.5rem;
+  scrollbar-width: thin;
+}
+
+.entradas--carrusel > * {
+  scroll-snap-align: start;
+}
+
+@media (min-width: 62rem) {
+  .entradas--carrusel {
+    grid-auto-columns: calc((100% - 3rem) / 3);
+  }
+}
+
 .entrada-tarjeta__media {
   display: block;
   aspect-ratio: 16 / 10;
@@ -878,11 +929,12 @@ hr {
   margin-bottom: 1.1rem;
 }
 
+/* El tema original ponía en gris las miniaturas del blog. */
 .entrada-tarjeta__media img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: grayscale(100%);
+  filter: grayscale(1);
   transition:
     transform 0.6s ease,
     filter var(--transicion);
@@ -890,7 +942,7 @@ hr {
 
 .entrada-tarjeta__media:hover img {
   transform: scale(1.04);
-  filter: grayscale(0%);
+  filter: grayscale(0);
 }
 
 .entrada-tarjeta__fecha,
@@ -966,28 +1018,48 @@ hr {
   border: 0;
 }
 
-/* Navegación entre entradas */
-.entrada-nav {
-  display: flex;
-  justify-content: space-between;
-  gap: 2rem;
-  border-top: 1px solid var(--linea);
-  margin-top: 4rem;
-  padding-top: 2rem;
-  font-size: 1rem;
+/* Contenido + barra lateral, como en el blog original */
+.con-lateral {
+  display: grid;
+  gap: clamp(2.5rem, 5vw, 4.5rem);
+  grid-template-columns: 1fr;
+  align-items: start;
 }
 
-.entrada-nav__etiqueta {
-  display: block;
-  font-size: 0.7rem;
-  letter-spacing: 0.3em;
+@media (min-width: 62rem) {
+  .con-lateral {
+    grid-template-columns: minmax(0, 1fr) 17rem;
+  }
+}
+
+.lateral__titulo {
+  font-size: 0.75rem;
+  letter-spacing: 0.35em;
   text-transform: uppercase;
   color: var(--tinta-3);
-  margin-bottom: 0.35rem;
+  padding-bottom: 0.9rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--linea);
 }
 
-.entrada-nav a:last-child {
-  text-align: right;
+.recientes {
+  list-style: none;
+  display: grid;
+  gap: 1.4rem;
+}
+
+.recientes__fecha {
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--tinta-3);
+  margin-bottom: 0.2rem;
+}
+
+.recientes a {
+  font-size: 1.0625rem;
+  line-height: 1.35;
 }
 
 /* Paginación */
@@ -1219,43 +1291,6 @@ hr {
 }
 
 /* ---------------------------------------------------------------
-   Aviso de edad
-   --------------------------------------------------------------- */
-.edad {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  background: var(--papel);
-  display: grid;
-  place-items: center;
-  padding: var(--gutter);
-  text-align: center;
-}
-
-.edad[hidden] {
-  display: none;
-}
-
-.edad__caja {
-  max-width: 32rem;
-}
-
-.edad__firma {
-  font-family: var(--firma);
-  font-size: clamp(3.5rem, 9vw, 5.5rem);
-  line-height: 1;
-  margin-bottom: 1.5rem;
-}
-
-.edad__acciones {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-top: 2rem;
-}
-
-/* ---------------------------------------------------------------
    Página 404
    --------------------------------------------------------------- */
 .error404 {
@@ -1275,7 +1310,6 @@ hr {
   .cabecera,
   .pie,
   .cookies-aviso,
-  .edad,
   .hero__nav {
     display: none !important;
   }

@@ -46,12 +46,9 @@ function collectUrls(text) {
 
 async function main() {
   // 1. Reunir todas las URLs referenciadas en cualquier parte del contenido.
-  const sources = ['posts.json', 'pages.json', 'pages-scraped.json', 'media.json'];
   const urls = new Set();
-  for (const f of sources) {
-    const p = join(CONTENT, f);
-    if (!existsSync(p)) continue;
-    for (const u of collectUrls(await readFile(p, 'utf8'))) urls.add(u);
+  for (const f of await ficherosDeContenido()) {
+    for (const u of collectUrls(await readFile(f, 'utf8'))) urls.add(u);
   }
 
   // rel → { url: original, alts: [variantes redimensionadas]}
@@ -124,6 +121,20 @@ async function main() {
   await writeFile(join(CONTENT, 'images.json'), JSON.stringify(manifest, null, 2) + '\n');
   console.log('→ content/images.json');
   console.log(`Peso de assets/img: ${await dirSize(IMG_DIR)}`);
+}
+
+// Todo lo que puede citar una imagen: los JSON de content/ y las entradas.
+async function ficherosDeContenido() {
+  const out = [];
+  const walk = async (dir) => {
+    for (const e of await readdir(dir, { withFileTypes: true })) {
+      const p = join(dir, e.name);
+      if (e.isDirectory()) await walk(p);
+      else if (/\.(json|html)$/.test(e.name)) out.push(p);
+    }
+  };
+  await walk(CONTENT);
+  return out;
 }
 
 async function imageWidth(file) {

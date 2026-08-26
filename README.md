@@ -8,8 +8,8 @@ es Node 20 o superior, y solo porque el generador está escrito en JavaScript.
 
 | | Antes (WordPress) | Ahora |
 |---|---|---|
-| CSS | 2,5 MB (tema Podium + WPBakery) | 22 KB |
-| JavaScript | jQuery + Revolution Slider + Swiper + 12 plugins | 7 KB propios |
+| CSS | 2,5 MB (tema Podium + WPBakery) | 23 KB |
+| JavaScript | jQuery + Revolution Slider + Swiper + 12 plugins | 6 KB propios |
 | Dependencias | ~15 plugins, PHP, MySQL | ninguna |
 | Alojamiento | hosting con PHP | cualquier servidor de ficheros |
 | Imágenes | JPG/PNG sin optimizar | WebP (261 imágenes, 32 MB) |
@@ -23,17 +23,19 @@ es Node 20 o superior, y solo porque el generador está escrito en JavaScript.
 ```
 content/           Los datos. Es lo que se edita.
   site.json          Textos, menú, tarifas, galerías, contacto.
-  posts.json         Las 91 entradas del blog (extraídas del WordPress).
+  entradas/          Una entrada de blog por fichero. Ver abajo.
+    blog-escort/       55 entradas
+    uncategorized/     36 entradas
   images.json        Mapa imagen original → WebP local. Lo genera tools/images.js.
-  categories.json    Categorías del blog.
   media.json         Metadatos de las imágenes (alt, medidas).
-  pages.json         Volcado crudo de las páginas del WP. Solo como referencia.
+  pages.json         Las páginas tal como estaban en WordPress. De aquí salen
+                     Cookies y Nota legal, sin retocar.
   pages-scraped.json Texto de las páginas ya renderizadas. Solo como referencia.
 
 src/
   templates.js       Plantillas HTML. Funciones puras: datos → cadena.
   styles.css         Toda la hoja de estilos.
-  main.js            Carrusel, menú, galería, avisos y formulario.
+  main.js            Carrusel, menú, galería, aviso de cookies y formulario.
 
 assets/
   img/               Las imágenes en WebP (versión grande + miniatura).
@@ -81,23 +83,29 @@ Todo está en [`content/site.json`](content/site.json). Edita, `npm run build`, 
 
 ### Escribir una entrada nueva
 
-Añade un objeto al principio de `content/posts.json`:
+Una entrada es **un fichero**. Se crea dentro de la carpeta de su categoría:
 
-```json
-{
-  "id": 99001,
-  "slug": "titulo-de-la-entrada",
-  "title": "Título de la entrada",
-  "date": "2026-09-01T12:00:00",
-  "permalink": "/2026/09/01/titulo-de-la-entrada/",
-  "categories": [3],
-  "excerpt": "Las primeras líneas, que salen en el listado.",
-  "html": "<p>El texto, en HTML.</p>",
-  "featured": null
-}
+```
+content/entradas/blog-escort/2026-09-01_titulo-de-la-entrada.html
 ```
 
-`npm run build` y aparece en el blog, en el feed y en el sitemap.
+El nombre del fichero lleva los metadatos: la fecha (`AAAA-MM-DD`) y el slug,
+que juntos forman la URL `/2026/09/01/titulo-de-la-entrada/`. La carpeta es la
+categoría. Dentro, el primer `<h1>` es el título y el resto es el texto:
+
+```html
+<h1>Título de la entrada</h1>
+
+<p>El primer párrafo, que además sale como resumen en el listado.</p>
+<p>Y el resto.</p>
+```
+
+Nada más. Ni fechas repetidas, ni JSON, ni ids. La miniatura del listado es la
+primera imagen que aparezca en el texto; si se quiere otra, se declara arriba
+del todo con `<!-- portada: 2018/10/foto.jpg -->`.
+
+`npm run build` y la entrada ya está en el blog, en la portada, en el feed RSS
+y en el sitemap.
 
 ---
 
@@ -123,27 +131,30 @@ así que los enlaces y el posicionamiento existentes siguen funcionando.
 
 ## En qué se diferencia del original
 
-Cosas que cambiaron a propósito, todas reversibles:
+El criterio es no inventar nada: los textos, las fotos y la estructura son los que
+había. Lo único que falta es lo que dependía de PHP o de un servicio ajeno.
 
-- **Aviso de mayoría de edad.** No estaba en la web original; se ha añadido porque es
-  contenido para adultos. Para quitarlo: borra la función `avisoEdad` de `src/main.js`
-  y el bloque `.edad` de `src/templates.js`.
 - **Formulario de contacto.** El original usaba Contact Form 7, que necesita PHP. Aquí
   el formulario abre el correo del visitante con el mensaje ya escrito (`mailto:`).
   Si se prefiere recibirlos en el buzón sin que se abra nada, la opción más simple es
   [Formspree](https://formspree.io): cambia el `<form>` para que apunte a su endpoint y
   borra la función `formularioContacto` de `src/main.js`.
 - **Banderas de idioma.** Eran el widget de GTranslate, que traducía la web con Google
-  al vuelo. Se ha quitado porque metía un script externo. El navegador ya ofrece traducir.
-- **Feed de Instagram del pie.** Llevaba tiempo roto en el original (mostraba
-  «Instagram no ha devuelto un 200»). Se ha sustituido por un enlace normal al perfil.
-- **Buscador.** El de WordPress necesitaba servidor. Se ha quitado. Si hace falta, se
-  puede añadir uno en cliente con un índice JSON generado en el build.
-- **Cookies.** La web nueva no instala ninguna cookie ni analítica. El aviso solo guarda
-  en `localStorage` que ya lo has visto. La página `/cookies/` se ha reescrito para
-  reflejarlo, en vez de copiar el texto genérico del plugin.
-- **Nota legal.** La página original estaba prácticamente vacía (una palabra). Se ha
-  redactado un texto mínimo en `site.json`; conviene que lo revise la clienta.
+  al vuelo mediante un script externo. Está pendiente de decidir si se recupera.
+- **Feed de Instagram del pie y de la barra lateral.** Llevaba tiempo roto en el
+  original (mostraba «Instagram no ha devuelto un 200»). Queda el enlace al perfil.
+- **Buscador.** El de WordPress necesitaba servidor. Si hace falta, se puede añadir uno
+  en cliente con un índice JSON generado en el build.
+
+Y dos correcciones sobre errores que arrastraba el original:
+
+- **El nombre y el botón del carrusel eran blancos sobre fondo blanco**, es decir,
+  invisibles en dos de las tres fotos. Ahora cada foto declara en `site.json` si su
+  texto va en oscuro o en claro.
+- **La página `/nota-legal/` contiene una sola palabra: «Linda».** Se ha dejado tal cual
+  porque es lo que había, pero está vacía a efectos prácticos y debería redactarse.
+  Lo mismo con `/cookies/`: el texto es el del plugin de WordPress y menciona Google
+  Analytics, que esta web ya no usa. Ambas se editan en `content/pages.json`.
 
 ### Imágenes que no se pudieron recuperar
 

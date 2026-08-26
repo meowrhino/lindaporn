@@ -55,27 +55,31 @@
     { "texto": "Nota legal", "url": "/nota-legal/" }
   ],
 
+  "_hero": "«texto» es el color de la tipografía sobre esa foto: oscuro o claro.",
   "hero": [
     {
       "titulo": "El placer de los sentidos",
       "subtitulo": "Linda Iriane",
       "boton": "Contacta",
       "url": "/contacto/",
-      "imagen": "2018/10/slider-desnuda-escort-linda-004.jpg"
+      "imagen": "2018/10/slider-desnuda-escort-linda-004.jpg",
+      "texto": "oscuro"
     },
     {
       "titulo": "Pasión por viajar",
       "subtitulo": "Linda Iriane",
       "boton": "Contacta",
       "url": "/contacto/",
-      "imagen": "2018/10/slider-playa-escort-linda-002.jpg"
+      "imagen": "2018/10/slider-playa-escort-linda-002.jpg",
+      "texto": "claro"
     },
     {
       "titulo": "Relación Sex & Art",
       "subtitulo": "Linda Iriane",
       "boton": "Descubre mi pasión",
       "url": "/sex-and-art/",
-      "imagen": "2018/10/slider-sex-and-art-escort-linda-003.jpg"
+      "imagen": "2018/10/slider-sex-and-art-escort-linda-003.jpg",
+      "texto": "oscuro"
     }
   ],
 
@@ -90,8 +94,8 @@
     },
     "bio": {
       "texto": "El arte es mi vocación, soy licenciada en Arte Dramático y tengo un máster en Actuación. Realizo pequeñas piezas y obras que expongo y presento en museos y teatros de pequeña audiencia.<br>Me encanta viajar, por esa razón vivo a caballo entre Barcelona y la ciudad de los diamantes, Amberes. Me encanta el cine, la literatura, la música, la ópera, todo el arte me estremece y emociona.",
-      "imagen": "2018/06/Linda-4b-baja.jpg",
-      "boton": { "texto": "Contacta conmigo", "url": "/contacto/" }
+      "imagen": "2018/10/claim-domino-escort-linda-001.png",
+      "boton": { "texto": "contacta conmigo", "url": "/contacto/" }
     },
     "franjaOscura": [
       "Pero mi pequeño gran secreto es la sexualidad. Disfruto de mi cuerpo así como de el/la compañero/a que quiera estar conmigo. Me encanta innovar y explorar el terreno de la alcoba, todas las manifestaciones me gustan, desde <strong>lo más erótico y romántico</strong>, pasando por el streaptease, hasta juegos más complejos como el BDSM.",
@@ -100,16 +104,16 @@
     "cita": "Espero que quieras disfrutar de una mujer guapa, elegante, divertida, cariñosa y culta, pero, sobre todo, de una mujer sin prejuicios, de amplio criterio, de una mujer que por naturaleza disfruta enormemente de la sexualidad, una mujer que se entrega en cuerpo y alma, siempre pensando en su compañero/a, concentrada en el placer de todos los sentidos. No lo olvides, mi alcoba es mi gran secreto, el escenario donde soy yo misma. Escort Barcelona.",
     "llamadas": [
       {
-        "titulo": "Conoce mis servicios",
-        "subtitulo": "Mi pasión",
+        "titulo": "Conoce mis Servicios",
         "url": "/servicios/",
+        "boton": "ver más",
         "imagen": "2018/10/claim-cama-escort-linda-004.jpg"
       },
       {
+        "subtitulo": "mi pasión",
         "titulo": "Sex & Art",
-        "subtitulo": "Blog escort",
         "url": "/sex-and-art/",
-        "imagen": "2018/06/Linda9-baja.jpg"
+        "boton": "ver más"
       }
     ]
   },
@@ -237,27 +241,20 @@
   "contacto_pagina": {
     "titulo": "Contacto",
     "subtitulo": "Linda Iriane",
-    "textoFormulario": "Escríbeme y te contesto en cuanto pueda.",
     "avisoFormulario": "Al enviar se abrirá tu programa de correo con el mensaje preparado."
   },
 
-  "notaLegal": {
-    "titulo": "Nota legal",
-    "parrafos": [
-      "Linda Iriane presta servicios de acompañamiento para personas mayores de edad. El acceso a esta web implica que declaras ser mayor de 18 años.",
-      "Todos los contenidos —textos y fotografías— son propiedad de Linda Iriane y no pueden reproducirse sin autorización expresa.",
-      "El pago de los servicios corresponde exclusivamente al tiempo de compañía. Cualquier otra cosa que suceda es fruto de un acuerdo libre entre personas adultas.",
-      "Para cualquier consulta relativa a esta nota legal o al tratamiento de tus datos, escribe a lindairianescort@gmail.com."
-    ]
+  "avisoCookies": "Usamos cookies para mejorar tu experiencia en todos los sentidos.",
+
+  "_categorias": "Cada carpeta de content/entradas/ es una categoría. Aquí solo se le pone nombre bonito.",
+  "categorias": {
+    "blog-escort": "Blog Escort",
+    "uncategorized": "Uncategorized"
   },
 
-  "cookies": {
-    "titulo": "Cookies",
-    "banner": "Usamos cookies para mejorar tu experiencia en todos los sentidos.",
-    "parrafos": [
-      "Esta web no usa cookies de seguimiento ni de publicidad. No hay analítica de terceros, ni píxeles, ni perfilado.",
-      "El único dato que se guarda en tu navegador es una marca local (<code>localStorage</code>) que recuerda que ya has visto este aviso, para no volver a enseñártelo. No sale de tu dispositivo y puedes borrarla vaciando los datos del sitio en tu navegador.",
-      "Si en el futuro se añadiera cualquier servicio externo que instale cookies, se pedirá tu consentimiento antes y se detallará aquí."
-    ]
-  }
+  "_paginasWp": "Cookies y Nota legal se generan tal cual desde content/pages.json, con el texto que ya tenían en WordPress.",
+  "paginasWp": [
+    { "slug": "cookies", "titulo": "Cookies", "url": "/cookies/" },
+    { "slug": "nota-legal", "titulo": "Nota legal", "url": "/nota-legal/" }
+  ]
 }
