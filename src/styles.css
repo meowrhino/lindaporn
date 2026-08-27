@@ -82,6 +82,9 @@ html {
 }
 
 body {
+  /* Red de seguridad: nada debe provocar scroll lateral. `clip` en vez de
+     `hidden` para no romper el position:sticky de la cabecera. */
+  overflow-x: clip;
   font-family: var(--serif);
   font-size: clamp(1.0625rem, 0.55vw + 0.93rem, 1.25rem);
   line-height: 1.75;
@@ -456,6 +459,9 @@ hr {
     display: block;
   }
 
+  /* Cerrado se va por la derecha, pero además con visibility:hidden: si solo
+     se desplaza, sus enlaces siguen siendo enfocables con el tabulador y el
+     teclado se pierde dentro de un menú que no se ve. */
   .nav {
     position: fixed;
     inset: 0;
@@ -463,12 +469,16 @@ hr {
     display: grid;
     place-items: center;
     transform: translateX(100%);
-    transition: transform var(--transicion);
+    visibility: hidden;
+    transition:
+      transform var(--transicion),
+      visibility var(--transicion);
     z-index: 35;
   }
 
   .nav[data-abierto='true'] {
     transform: translateX(0);
+    visibility: visible;
   }
 
   .nav__lista {
@@ -512,8 +522,12 @@ hr {
 /* Las fotos del carrusel son 1920×800 y llevan la composición dentro
    (el marco, las fotos superpuestas y el hueco claro para el texto).
    Respetando esa proporción no se recortan y el texto cae donde debe. */
+/* `width: 100%` es imprescindible: sin un ancho definido, cuando el
+   `min-height` gana en pantallas estrechas la proporción estira el ancho
+   (416px × 12/5 = 998px) en vez de la altura, y el hero se sale de la página. */
 .hero {
   position: relative;
+  width: 100%;
   aspect-ratio: 12 / 5;
   min-height: 26rem;
   overflow: hidden;
@@ -578,11 +592,17 @@ hr {
   color: var(--papel);
 }
 
+/* El tamaño va en la clase, no en el h1: solo el primer slide es h1 y los
+   otros dos son <p>, pero los tres tienen que verse igual de grandes. */
 .hero__titulo {
+  font-family: var(--serif);
+  font-size: clamp(2.75rem, 6vw, 5rem);
+  line-height: 1.12;
   text-transform: uppercase;
   font-weight: 500;
   letter-spacing: -0.015em;
   max-width: 14ch;
+  text-wrap: balance;
 }
 
 .hero__nombre {
@@ -601,6 +621,66 @@ hr {
   display: flex;
   gap: 0.75rem;
   justify-content: center;
+}
+
+/* En móvil la foto no cabe entera sin recortarla, y el hueco claro que la
+   composición reserva para el texto se pierde. Se apila: primero el texto
+   sobre blanco y debajo la foto completa, que es lo que hacía el original. */
+@media (max-width: 48rem) {
+  .hero,
+  .hero--interior {
+    aspect-ratio: auto;
+    min-height: 0;
+  }
+
+  .hero__slide {
+    position: static;
+    display: none;
+    flex-direction: column-reverse;
+    opacity: 1;
+  }
+
+  .hero__slide[data-activa='true'] {
+    display: flex;
+  }
+
+  .hero__img,
+  .hero__slide[data-activa='true'] .hero__img {
+    position: static;
+    width: 100%;
+    height: auto;
+    animation: none;
+  }
+
+  /* Sobre blanco, todos los rótulos en tinta, también los del slide claro. */
+  .hero__slide,
+  .hero__slide[data-texto='claro'] {
+    color: var(--tinta);
+  }
+
+  .hero__texto {
+    height: auto;
+    padding-block: 2.5rem 2rem;
+  }
+
+  .hero__slide .boton--claro {
+    border-color: var(--tinta);
+    color: var(--tinta);
+  }
+
+  .hero__slide .boton--claro:hover {
+    background: var(--tinta);
+    color: var(--papel);
+  }
+
+  .hero__nav {
+    position: static;
+    padding-block: 1.5rem;
+  }
+
+  .hero__punto {
+    background: rgb(25 25 25 / 25%);
+  }
 }
 
 .hero__punto {
@@ -758,7 +838,9 @@ hr {
   padding-top: 1.75rem;
 }
 
+/* Es un h2 por jerarquía, pero se ve al tamaño que tenía como h3. */
 .tarifa__nombre {
+  font-size: clamp(1.875rem, 3.5vw, 2.75rem);
   margin-bottom: 0.25rem;
 }
 

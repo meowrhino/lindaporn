@@ -146,8 +146,19 @@ function limpiarHtml(html, ctx) {
   // Restos: párrafos vacíos, comentarios y bloques de WordPress.
   out = out.replace(/<!--[\s\S]*?-->/g, '');
   out = out.replace(/<p>\s*(?:&nbsp;|\s)*<\/p>/gi, '');
-  out = out.replace(/<a[^>]*>\s*<\/a>/gi, '');
+  out = out.replace(/<a[^>]*>(?:\s|&nbsp;|<br\s*\/?>)*<\/a>/gi, '');
   out = out.replace(/\n{3,}/g, '\n\n');
+
+  // Un enlace cuyo único contenido es una imagen sin alt no tiene nombre: quien
+  // navega con lector de pantalla solo oye «enlace». Le ponemos el destino.
+  out = out.replace(/<a\b([^>]*)>([\s\S]*?)<\/a>/gi, (etiqueta, attrs, dentro) => {
+    if (dentro.replace(/<[^>]*>/g, '').trim() || /aria-label=/.test(attrs)) return etiqueta;
+    const href = attrs.match(/href="([^"]+)"/)?.[1] || '';
+    const nombre = /\.(webp|jpe?g|png|gif)$/i.test(href)
+      ? 'Ver la imagen'
+      : `Ir a ${href.replace(/^https?:\/\/(www\.)?/, '').replace(/\/.*$/, '')}`;
+    return `<a${attrs} aria-label="${esc(nombre)}">${dentro}</a>`;
+  });
 
   return out.trim();
 }
@@ -174,10 +185,13 @@ function paginaHome() {
     .map((s, i) => {
       const foto = img(s.imagen);
       const claro = s.texto === 'claro';
+      // Solo el primer rótulo es el h1 de la página: tres h1 en una misma
+      // página confunden a los lectores de pantalla y al buscador.
+      const T = i === 0 ? 'h1' : 'p';
       return `<div class="hero__slide" data-activa="${i === 0}" data-texto="${esc(s.texto || 'oscuro')}" aria-hidden="${i !== 0}">
         ${foto ? `<img class="hero__img" src="${ruta(foto.big, ctx.prefix)}" alt="" ${i === 0 ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">` : ''}
         <div class="contenedor hero__texto">
-          <h1 class="hero__titulo">${esc(s.titulo)}</h1>
+          <${T} class="hero__titulo">${esc(s.titulo)}</${T}>
           <p class="hero__nombre">${esc(s.subtitulo)}</p>
           <a class="boton${claro ? ' boton--claro' : ''}" href="${ruta(s.url, ctx.prefix)}">${esc(s.boton)}</a>
         </div>
@@ -274,8 +288,8 @@ function paginaTarifas(clave, url) {
       <div class="hero__slide" data-activa="true">
         <img class="hero__img" src="${ruta(portada.big, ctx.prefix)}" alt="" fetchpriority="high" decoding="async">
         <div class="contenedor hero__texto">
-          <p class="hero__sub">${esc(d.titulo)}</p>
-          <h1 class="hero__titulo">${esc(d.bloques[0].nombre)}</h1>
+          <p class="hero__nombre">${esc(d.titulo)}</p>
+          <p class="hero__titulo">${esc(d.bloques[0].nombre)}</p>
         </div>
       </div>
     </section>`
@@ -398,12 +412,17 @@ function paginaContacto() {
 function paginaWp({ slug, titulo, url }) {
   const ctx = ctxDe(url);
   const pagina = paginasWp.find((p) => p.slug === slug);
-  const cuerpo = limpiarHtml(quitarShortcodes(pagina?.html || ''), ctx);
+  let cuerpo = limpiarHtml(quitarShortcodes(pagina?.html || ''), ctx);
+
+  // Si el texto ya empieza con su propio encabezado, ese es el título de la
+  // página: se asciende a h1 en vez de añadir otro por encima.
+  const tieneEncabezado = /^<h2\b/.test(cuerpo);
+  if (tieneEncabezado) cuerpo = cuerpo.replace(/^<h2\b([^>]*)>([\s\S]*?)<\/h2>/, '<h1$1>$2</h1>');
 
   const contenido = `
   <section class="seccion">
     <div class="contenedor articulo">
-      ${cuerpo.includes('<h2') ? '' : rotulo({ titulo, nivel: 1 })}
+      ${tieneEncabezado ? '' : rotulo({ titulo, nivel: 1 })}
       <div class="articulo__cuerpo">${cuerpo}</div>
     </div>
   </section>`;

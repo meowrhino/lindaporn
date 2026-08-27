@@ -145,9 +145,17 @@ function avisoCookies(site, ctx) {
 /* ---------------------------------------------------------------
    Documento completo
    --------------------------------------------------------------- */
+// Google corta el título sobre los 60 caracteres y la descripción sobre los
+// 160. Se recortan aquí, en un solo sitio, y no en cada página.
+const recortar = (texto, largo) =>
+  texto.length > largo ? `${texto.slice(0, largo - 1).trimEnd()}…` : texto;
+
 export function layout({ site, ctx, contenido, titulo, descripcion, imagen }) {
-  const t = titulo ? `${titulo} — ${site.titulo}` : `${site.titulo} — ${site.eslogan}`;
-  const d = descripcion || site.descripcion;
+  // Con títulos ya largos, añadir «— Linda Iriane» solo roba sitio.
+  const t = !titulo
+    ? `${site.titulo} — ${site.eslogan}`
+    : recortar(titulo.length > 45 ? titulo : `${titulo} — ${site.titulo}`, 65);
+  const d = recortar(descripcion || site.descripcion, 158);
   const canonica = site.url.replace(/\/$/, '') + ctx.url;
   const og = imagen ? site.url.replace(/\/$/, '') + imagen : '';
 
@@ -225,7 +233,7 @@ export function bloquesTarifas(bloques, ctx) {
     ${bloques
       .map(
         (b) => `<section class="tarifa" data-aparece>
-      <h3 class="tarifa__nombre">${esc(b.nombre)}</h3>
+      <h2 class="tarifa__nombre">${esc(b.nombre)}</h2>
       <p class="tarifa__unidad">${esc(b.unidad)}</p>
       <ul class="tarifa__lista">
         ${b.tarifas
@@ -242,11 +250,14 @@ export function bloquesTarifas(bloques, ctx) {
 }
 
 export function galeria(fotos, ctx, img) {
+  const total = fotos.length;
   const items = fotos
-    .map((rel) => {
+    .map((rel, n) => {
       const i = img(rel);
       if (!i) return '';
-      return `<button class="galeria__item" type="button" data-grande="${ruta(i.big, ctx.prefix)}">
+      // Sin esto un lector de pantalla solo oye «botón» repetido dieciséis veces.
+      return `<button class="galeria__item" type="button" data-grande="${ruta(i.big, ctx.prefix)}"
+        aria-label="Ampliar la foto ${n + 1} de ${total}">
         <img src="${ruta(i.thumb, ctx.prefix)}" alt="" loading="lazy" decoding="async">
       </button>`;
     })
@@ -254,7 +265,7 @@ export function galeria(fotos, ctx, img) {
 
   return `<div class="galeria">${items}</div>
   <dialog class="visor" aria-label="Visor de fotos">
-    <figure class="visor__figura"><img src="" alt=""></figure>
+    <figure class="visor__figura"><img alt=""></figure>
     <button class="visor__boton visor__boton--prev" type="button" aria-label="Anterior">‹</button>
     <button class="visor__boton visor__boton--next" type="button" aria-label="Siguiente">›</button>
     <button class="visor__boton visor__cerrar" type="button" aria-label="Cerrar">×</button>

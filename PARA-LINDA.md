@@ -24,6 +24,9 @@ Guárdalo en favoritos. La primera vez te pedirá tu clave; luego ya no.
 Para poner algo en **negrita** o en *cursiva*: seleccionas el texto y le das al
 botón. Igual con **enlace**.
 
+Si pegas texto de WhatsApp, de un Word o de una web, entra limpio: se queda solo
+lo que dice, sin los colores ni las letras raras de donde venga.
+
 **4.** Para meter una foto: botón **foto**, la eliges y se coloca sola.
 
 Puedes meter todas las que quieras. Se preparan solas para que la web no pese
@@ -33,6 +36,17 @@ Puedes meter todas las que quieras. Se preparan solas para que la web no pese
 
 Tarda un minuto en verse en la web. Si actualizas y no está, espera un poco más
 y vuelve a actualizar.
+
+---
+
+## Si cierras sin querer
+
+Lo que escribes se va guardando solo en tu dispositivo. Si cierras la pestaña,
+se va la luz o te llaman por teléfono, al volver a entrar te lo encuentras
+donde lo dejaste.
+
+Las **fotos** son la excepción: esas hay que volver a ponerlas. Por eso, si
+sales con fotos puestas sin publicar, el navegador te pregunta si estás segura.
 
 ---
 

@@ -14,7 +14,7 @@ es Node 20 o superior, y solo porque el generador está escrito en JavaScript.
 | Alojamiento | hosting con PHP | Cloudflare Workers (static assets) |
 | Imágenes | JPG/PNG sin optimizar | WebP (261 imágenes, 32 MB) |
 
-110 páginas: 8 páginas fijas, 91 entradas de blog, 8 páginas de paginación, 2 categorías y un 404.
+111 páginas: 8 fijas, 91 entradas de blog, 8 de paginación, 2 categorías, el editor y un 404.
 
 ---
 
@@ -187,22 +187,7 @@ deja de funcionar.
 
 ### Puesta en marcha en la cuenta de Linda
 
-Por orden. Todo son cuentas gratuitas.
-
-1. **Cuenta de GitHub suya.** Que la cree ella, con su correo y su 2FA.
-2. **Traspasar el repositorio**: Settings → *Transfer ownership*. Se lleva el
-   historial y las Actions, y los enlaces viejos redirigen solos.
-3. **Cambiar dos líneas** en `content/site.json`: `"repo"` a `sunombre/lindaporn`.
-4. **Cuenta de Cloudflare suya** y `lindairiane.com` añadido como zona
-   (cambiar los nameservers en el registrador del dominio).
-5. **Email Routing** activado en esa zona, con `lindairianescort@gmail.com`
-   verificada como dirección de destino.
-6. **Desplegar el Worker** (`npm run deploy`) y conectarlo al repo desde
-   Settings → Builds.
-7. **Ruta del dominio**: en el Worker, Settings → Domains & Routes, añadir
-   `lindairiane.com` y `www.lindairiane.com`.
-8. **Su token de GitHub** (fine-grained, Contents: Read and write, solo ese
-   repositorio) pegado una vez en `/escribir/`.
+Guion paso a paso en [PUESTA-EN-MARCHA.md](PUESTA-EN-MARCHA.md).
 
 Las URLs de las entradas mantienen el formato `/AÑO/MES/DÍA/slug/` del
 WordPress, así que los enlaces y el posicionamiento existentes siguen

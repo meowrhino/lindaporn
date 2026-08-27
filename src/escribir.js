@@ -53,7 +53,14 @@ const sessionActual = () => clave;
    --------------------------------------------------------------- */
 async function entrar(valor) {
   clave = valor;
-  await pedir(''); // si la clave no vale, esto lanza
+
+  // Comprobamos aquí que la clave además deja escribir: más vale enterarse al
+  // entrar que después de haber escrito una entrada entera.
+  const repositorio = await pedir('');
+  if (!repositorio.permissions?.push) {
+    throw new Error('esa clave solo deja leer, no publicar');
+  }
+
   try {
     localStorage.setItem(CLAVE, valor);
   } catch {
@@ -64,6 +71,7 @@ async function entrar(valor) {
   $('salir').hidden = false;
   $('fecha').value = hoy();
   refrescarRuta();
+  recuperarBorrador();
 }
 
 $('entrar').addEventListener('click', async () => {
@@ -117,6 +125,36 @@ function envolver(etiqueta) {
   }
 }
 
+// Pegar desde Word, WhatsApp o una web mete tipografías, colores y tablas.
+// Se pega solo el texto; el formato se pone con los botones.
+cuerpo.addEventListener('paste', (e) => {
+  e.preventDefault();
+  const plano = (e.clipboardData || window.clipboardData).getData('text/plain');
+  const lineas = plano.split(/\n{2,}/).filter((t) => t.trim());
+
+  if (lineas.length > 1) {
+    // Varios párrafos: se insertan como tales.
+    const trozo = document.createDocumentFragment();
+    for (const linea of lineas) {
+      const p = document.createElement('p');
+      p.textContent = linea.trim();
+      trozo.appendChild(p);
+    }
+    insertar(trozo);
+  } else {
+    insertar(document.createTextNode(plano));
+  }
+});
+
+function insertar(nodo) {
+  const sel = window.getSelection();
+  if (!sel.rangeCount) return cuerpo.appendChild(nodo);
+  const rango = sel.getRangeAt(0);
+  rango.deleteContents();
+  rango.insertNode(nodo);
+  sel.collapseToEnd();
+}
+
 document.querySelectorAll('.escritorio__barra button').forEach((btn) => {
   btn.addEventListener('mousedown', (e) => e.preventDefault());
   btn.addEventListener('click', () => {
@@ -165,28 +203,105 @@ $('ficheroFoto').addEventListener('change', async (e) => {
 
   for (const fichero of ficheros) {
     estado(`Preparando ${fichero.name}…`);
-    const bitmap = await createImageBitmap(fichero);
-    const [grande, mini] = await Promise.all([aWebp(bitmap, ANCHO_GRANDE), aWebp(bitmap, ANCHO_MINI)]);
-    bitmap.close();
+    try {
+      // Algunos formatos del móvil (HEIC) no los sabe abrir el navegador.
+      const bitmap = await createImageBitmap(fichero);
+      const [grande, mini] = await Promise.all([
+        aWebp(bitmap, ANCHO_GRANDE),
+        aWebp(bitmap, ANCHO_MINI),
+      ]);
+      bitmap.close();
+      if (!grande || !mini) throw new Error('no se ha podido convertir');
 
-    const fecha = $('fecha').value || hoy();
-    const nombre = slugificar(fichero.name.replace(/\.[^.]+$/, '')) || 'foto';
-    const base = `assets/img/${fecha.slice(0, 4)}/${fecha.slice(5, 7)}/${nombre}-${contador()}`;
+      const fecha = $('fecha').value || hoy();
+      const nombre = slugificar(fichero.name.replace(/\.[^.]+$/, '')) || 'foto';
+      const base = `assets/img/${fecha.slice(0, 4)}/${fecha.slice(5, 7)}/${nombre}-${contador()}`;
 
-    const provisional = URL.createObjectURL(grande);
-    pendientes.set(provisional, { base, grande, mini });
+      const provisional = URL.createObjectURL(grande);
+      pendientes.set(provisional, { base, grande, mini });
 
-    const img = document.createElement('img');
-    img.src = provisional;
-    img.alt = '';
-    cuerpo.appendChild(img);
-    cuerpo.appendChild(document.createElement('p'));
+      const img = document.createElement('img');
+      img.src = provisional;
+      img.alt = '';
+      cuerpo.appendChild(img);
+      cuerpo.appendChild(document.createElement('p'));
+      estado('');
+    } catch {
+      estado(`No he podido usar «${fichero.name}». Prueba a guardarla como JPG.`, true);
+    }
   }
-  estado('');
+  guardarBorrador();
 });
 
 let n = 0;
 const contador = () => String(++n).padStart(2, '0');
+
+/* ---------------------------------------------------------------
+   Borrador: lo que se escribe no se pierde aunque se cierre la pestaña
+   Las fotos no caben en localStorage, así que se guarda solo el texto y se
+   avisa antes de salir si quedaba alguna sin publicar.
+   --------------------------------------------------------------- */
+const BORRADOR = 'li-borrador';
+
+function guardarBorrador() {
+  try {
+    localStorage.setItem(
+      BORRADOR,
+      JSON.stringify({
+        titulo: $('titulo').value,
+        fecha: $('fecha').value,
+        categoria: $('categoria').value,
+        cuerpo: cuerpo.innerHTML,
+      }),
+    );
+  } catch {
+    /* sin espacio o sin permiso: se sigue escribiendo igual */
+  }
+}
+
+function recuperarBorrador() {
+  let guardado;
+  try {
+    guardado = JSON.parse(localStorage.getItem(BORRADOR) || 'null');
+  } catch {
+    return;
+  }
+  if (!guardado?.titulo && !guardado?.cuerpo?.trim()) return;
+
+  $('titulo').value = guardado.titulo || '';
+  if (guardado.fecha) $('fecha').value = guardado.fecha;
+  if (guardado.categoria) $('categoria').value = guardado.categoria;
+  // Las fotos del borrador apuntaban a blobs que ya no existen: fuera.
+  cuerpo.innerHTML = (guardado.cuerpo || '').replace(/<img[^>]*src="blob:[^"]*"[^>]*>/g, '');
+  refrescarRuta();
+  estado('He recuperado lo que estabas escribiendo. Las fotos hay que volver a ponerlas.');
+}
+
+const olvidarBorrador = () => {
+  try {
+    localStorage.removeItem(BORRADOR);
+  } catch {
+    /* nada que borrar */
+  }
+};
+
+let guardadoPendiente;
+const guardarLuego = () => {
+  clearTimeout(guardadoPendiente);
+  guardadoPendiente = setTimeout(guardarBorrador, 800);
+};
+
+cuerpo.addEventListener('input', guardarLuego);
+$('titulo').addEventListener('input', guardarLuego);
+$('fecha').addEventListener('change', guardarBorrador);
+$('categoria').addEventListener('change', guardarBorrador);
+
+// Las fotos sí se perderían: si hay alguna sin publicar, avisamos al salir.
+window.addEventListener('beforeunload', (e) => {
+  if (!pendientes.size) return;
+  e.preventDefault();
+  e.returnValue = '';
+});
 
 /* ---------------------------------------------------------------
    Publicar: un único commit con la entrada y sus fotos
@@ -323,6 +438,7 @@ $('publicar').addEventListener('click', async () => {
     $('titulo').value = '';
     cuerpo.innerHTML = '';
     pendientes.clear();
+    olvidarBorrador();
     refrescarRuta();
   } catch (err) {
     estado(`No se ha podido publicar: ${err.message}`, true);

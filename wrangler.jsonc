@@ -4,6 +4,12 @@
   "main": "worker.js",
   "compatibility_date": "2026-08-01",
 
+  // wrangler lo ejecuta solo antes de `dev` y de `deploy`, así que docs/ nunca
+  // se queda viejo y Cloudflare puede construir el sitio sin más configuración.
+  "build": {
+    "command": "node build.js"
+  },
+
   // La web entera es estática: docs/ lo genera build.js.
   // Las peticiones a estos ficheros no pasan por el Worker y son gratis e
   // ilimitadas; el Worker solo se ejecuta para /api/contacto.
