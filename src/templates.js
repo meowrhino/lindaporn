@@ -215,10 +215,11 @@ export function tarjetaEntrada(entrada, ctx, img) {
   const enlace = ruta(entrada.permalink, ctx.prefix);
   return `<article class="entrada-tarjeta" data-aparece>
     ${
+      // La miniatura no es otro enlace: el del título cubre toda la tarjeta.
       portada
-        ? `<a class="entrada-tarjeta__media" href="${enlace}" tabindex="-1" aria-hidden="true">
+        ? `<span class="entrada-tarjeta__media">
              <img src="${ruta(portada.thumb, ctx.prefix)}" alt="" loading="lazy" decoding="async">
-           </a>`
+           </span>`
         : ''
     }
     <p class="entrada-tarjeta__fecha">${fechaLarga(entrada.fecha)}</p>

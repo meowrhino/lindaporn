@@ -365,6 +365,29 @@ function refrescarRuta() {
 $('titulo').addEventListener('input', refrescarRuta);
 $('fecha').addEventListener('change', refrescarRuta);
 
+/* Salida de emergencia, como el botón de descargar de El mundo de las Jordis:
+   si la clave ha caducado o GitHub no va, se guarda el archivo y se envía a
+   mano. El nombre ya sale bien puesto, así que solo hay que dejarlo en su
+   carpeta de content/entradas/ y hacer push. */
+$('descargar').addEventListener('click', () => {
+  const titulo = $('titulo').value.trim();
+  if (!titulo) return estado('Ponle un título.', true);
+
+  const fecha = $('fecha').value || hoy();
+  const nombre = `${fecha}_${slugificar(titulo)}.html`;
+  const fichero = new Blob([`<h1>${titulo}</h1>\n\n${cuerpoLimpio()}\n`], { type: 'text/html' });
+
+  const enlace = Object.assign(document.createElement('a'), {
+    href: URL.createObjectURL(fichero),
+    download: nombre,
+  });
+  enlace.click();
+  URL.revokeObjectURL(enlace.href);
+
+  const carpeta = $('categoria').value;
+  estado(`Guardado como ${nombre}. Va en content/entradas/${carpeta}/`);
+});
+
 $('publicar').addEventListener('click', async () => {
   const titulo = $('titulo').value.trim();
   const fecha = $('fecha').value || hoy();
