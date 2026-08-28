@@ -1,6 +1,6 @@
 # Puesta en marcha
 
-Guion de la sesión con Linda. Una hora larga si nada se tuerce.
+Guion de la videollamada con Linda. Una hora larga si nada se tuerce.
 
 Todo son cuentas gratuitas. **Que las cree ella**, con su correo y su móvil: si
 las creas tú con tu email, el traspaso es de mentira y dentro de dos años nadie
@@ -8,24 +8,93 @@ sabe de quién es la web.
 
 ---
 
+## Aviso importante: el dominio tiene correo
+
+Consultando los DNS actuales (`dig`), `lindairiane.com` **no es solo la web**:
+
+```
+NS      ns1-ns3.cdmon.net, ns4-ns5.cdmondns-01.*   ← el DNS lo lleva cdmon
+A       lindairiane.com        → 134.0.9.152
+MX      lindairiane.com        → 10 mail.lindairiane.com  (→ 134.0.9.152)
+TXT     v=spf1 include:_spf.srv.cat ~all
+TXT     v=DMARC1; p=quarantine; aspf=s; adkim=r        (en _dmarc)
+TXT     J35jIx1GVq…  y  jZyxfKKqFi…                    (verificaciones)
+CNAME   www, ftp → lindairiane.com
+A       mail, webmail, autodiscover → 134.0.9.152
+```
+
+Dos cosas que se deducen de ahí:
+
+1. **Hay buzones de correo en ese dominio.** Existen `mail`, `webmail` y
+   `autodiscover`, y hay SPF y DMARC configurados. Alguien usa —o usaba—
+   direcciones `@lindairiane.com`.
+2. **La web y el correo están en el mismo servidor de cdmon** (134.0.9.152).
+   Si se da de baja el hosting, **el correo se cae con él**.
+
+Y hay un choque: Cloudflare Email Routing **sustituye los MX** del dominio. No
+pueden convivir con los de cdmon.
+
+### Qué hacer el domingo
+
+**Nada de Email Routing.** Se copian los registros de arriba tal cual en
+Cloudflare, se deja el correo donde está y la web pasa al Worker. El formulario
+de contacto sigue funcionando con el `mailto:` de siempre, que es exactamente
+lo que hace hoy.
+
+El correo se decide otro día, con calma, cuando ella conteste a esto:
+
+> **¿Usas alguna dirección `@lindairiane.com`?** ¿Entras a `webmail.lindairiane.com`?
+
+- **No las usa** → se activa Email Routing, se reenvía todo a su Gmail y el
+  formulario pasa a enviar correo de verdad. Gratis.
+- **Sí las usa** → o se migran esos buzones a Cloudflare (reenvío a Gmail,
+  gratis, pero solo recibir) o se deja el correo en cdmon y el formulario se
+  resuelve con Formspree. Hay que exportar el correo guardado antes de tocar nada.
+
+---
+
 ## Antes de quedar
 
 - [ ] Que tenga a mano el correo `lindairianescort@gmail.com` abierto.
-- [ ] Saber **dónde está comprado `lindairiane.com`** y tener acceso al panel
-      del registrador (ahí se cambian los nameservers). Sin esto, el paso 4 no
-      se puede terminar.
+- [ ] **Dónde se paga el dominio.** El registrador es Arsys/Nicline y el DNS lo
+      lleva cdmon, así que puede tener dos cuentas distintas. Los nameservers se
+      cambian donde esté el dominio. **Sin ese acceso el domingo no hay web
+      nueva**: un Worker no puede servir un dominio cuya zona no esté en
+      Cloudflare.
+- [ ] Preguntarle lo del correo `@lindairiane.com` (arriba).
 - [ ] Que cambie ya la contraseña de `wp-admin`, que circuló por WhatsApp.
+- [ ] Que **no** dé de baja el hosting de cdmon ese día. Ahí está su correo.
 
 ---
+
+## 0 · Lo primero de la llamada: los nameservers
+
+Cambiarlos **antes que nada**, porque tardan en propagarse y todo lo demás
+depende de ello. Mientras tanto se hacen los pasos 1 y 2.
+
+- [ ] Ella crea cuenta en cloudflare.com.
+- [ ] Add a site → `lindairiane.com` → plan **Free**.
+- [ ] Cloudflare escanea los DNS actuales. **Revisar uno por uno** contra la
+      lista del principio de este documento: sobre todo el **MX**, el **SPF** y
+      el **DMARC**. Si falta alguno, añadirlo a mano antes de continuar.
+- [ ] Cambiar los nameservers donde esté el dominio (Arsys/Nicline, o cdmon si
+      lo gestiona él).
+- [ ] Seguir con lo demás. La zona pasará a «Active» en un rato.
 
 ## 1 · GitHub
 
 - [ ] Ella crea cuenta en github.com y activa la verificación en dos pasos.
 - [ ] Tú: Settings → Danger Zone → **Transfer ownership** del repo `lindaporn`
-      a su usuario. Se lleva el historial y las Actions.
+      a su usuario. Se lleva el historial, las Actions y los enlaces viejos
+      redirigen solos.
 - [ ] Ella acepta el traspaso desde su correo.
-- [ ] Editar `content/site.json` y poner `"repo": "suusuario/lindaporn"`.
-- [ ] `git remote set-url origin https://github.com/suusuario/lindaporn.git`
+- [ ] Que te añada como **colaborador** del repo ya traspasado, para poder
+      seguir haciendo push.
+- [ ] En tu copia local: `git remote set-url origin https://github.com/ELLA/lindaporn.git`
+- [ ] Editar `content/site.json` → `"repo": "ELLA/lindaporn"`, y push.
+
+> Traspasar, no crear un repo nuevo y empujar: así no se pierden los commits ni
+> hay que reconfigurar las Actions.
 
 ## 2 · Su clave para escribir
 
@@ -38,24 +107,23 @@ sabe de quién es la web.
 > Si la clave solo tuviera permiso de lectura, el editor lo dice al entrar en
 > vez de dejarla escribir una entrada entera para nada.
 
-## 3 · Cloudflare
+## 3 · Acceso a su Cloudflare
 
-- [ ] Ella crea cuenta en cloudflare.com.
-- [ ] Add a site → `lindairiane.com` → plan **Free**.
-- [ ] Cloudflare le da dos nameservers. **Cambiarlos en el registrador** del
-      dominio. Tarda entre unos minutos y unas horas en propagarse.
+Para poder desplegar desde tu máquina hace falta que tu cuenta vea la suya:
 
-## 4 · Correo del formulario
+- [ ] Ella: Manage Account → **Members** → Invite → tu correo, rol
+      **Administrator**. Aceptas la invitación.
+- [ ] `npx wrangler login` en tu máquina y, si pregunta, elegir **su** cuenta.
 
-- [ ] En la zona `lindairiane.com`: **Email → Email Routing** → habilitar.
-      Añade solo los registros MX y SPF que pide.
-- [ ] Destination addresses → añadir `lindairianescort@gmail.com` y
-      **verificarla** desde el correo de confirmación.
-- [ ] Comprobar que `destination_address` en `wrangler.jsonc` es esa misma
-      dirección.
+> Alternativa si prefieres no entrar en su cuenta: que comparta pantalla y lo
+> haga ella, o que genere un API token y lo uses con `CLOUDFLARE_API_TOKEN`.
 
-> Enviar a una dirección verificada no consume cuota en ningún plan. Por eso
-> esto sale gratis.
+## 4 · Correo del formulario — **no tocar el domingo**
+
+Ver el aviso del principio: la zona tiene MX propios y activar Email Routing
+los sustituiría. Se deja para otro día.
+
+El formulario mientras tanto funciona con `mailto:`, igual que ahora.
 
 ## 5 · Desplegar
 
@@ -73,35 +141,27 @@ npm run deploy
 ## 6 · Probar de verdad, con ella delante
 
 - [ ] Abrir `lindairiane.com` en **su** móvil.
-- [ ] Rellenar el formulario de contacto y **comprobar que le llega el correo**.
-
-> **Esto es lo único que no se ha podido probar de antemano.** El Worker entero
-> funciona —lo comprobé con `wrangler dev`: rutas, validación, antispam, el 404
-> y la redirección de barra final—, pero en local el envío de correo está
-> simulado: contesta que sí sin mandar nada. El envío de verdad solo se puede
-> probar con la zona ya en Cloudflare.
->
-> Si no llega, `npx wrangler tail` dice el motivo. Los dos habituales:
->
-> - **La dirección de destino no está verificada** en Email Routing. Es el caso
->   más probable. Se arregla en el paso 4.
-> - **El remitente no vale.** `REMITENTE` en `wrangler.jsonc` es
->   `web@lindairiane.com`. Tiene que ser del dominio de la zona; si Cloudflare
->   lo rechaza, prueba con una dirección que exista como regla en Email Routing.
->
-> Mientras no funcione no se rompe nada: el formulario se cae solo al `mailto:`
-> y abre el correo del visitante, como hasta ahora.
+- [ ] Comprobar que `lindairiane.com/2018/11/03/el-arte-del-bdsm/` sigue
+      funcionando: las direcciones de todas las entradas se han conservado.
+- [ ] **Que le siga llegando el correo a su dirección `@lindairiane.com`**, si
+      la usa. Mandarle un mensaje de prueba desde otra cuenta.
 - [ ] Que **ella** publique una entrada de prueba desde `/escribir/`, con foto.
 - [ ] Verla aparecer en la web al cabo de un minuto.
 - [ ] Borrarla después: se quita el fichero de `content/entradas/` y se hace push.
+- [ ] El formulario de contacto abrirá su programa de correo (`mailto:`). Es lo
+      esperado hasta que se decida lo del correo.
 
-## 7 · Cerrar el WordPress
+## 7 · El WordPress: dejarlo apagado, no darlo de baja
+
+**No dar de baja el hosting de cdmon.** La web y el correo están en el mismo
+servidor (134.0.9.152): si se cancela, el correo del dominio se cae con él.
 
 - [ ] Descargar una copia de seguridad completa del WordPress y guardarla.
-- [ ] Dar de baja el hosting o, como mínimo, dejar el WordPress inaccesible.
-      Un WP 6.9.7 con quince plugins sin mantenimiento es un blanco fácil.
-- [ ] Comprobar que `lindairiane.com/2018/11/03/el-arte-del-bdsm/` sigue
-      funcionando: las direcciones de todas las entradas se han conservado.
+- [ ] Dejar el WordPress **inaccesible** —proteger `/wp/` con contraseña, o
+      renombrar la carpeta— sin tocar el correo. Un WP 6.9.7 con quince plugins
+      sin mantenimiento es un blanco fácil.
+- [ ] Ya sin prisa, decidir lo del correo y entonces sí se puede plantear bajar
+      el hosting.
 
 ---
 
