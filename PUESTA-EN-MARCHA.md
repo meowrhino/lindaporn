@@ -74,8 +74,23 @@ npm run deploy
 
 - [ ] Abrir `lindairiane.com` en **su** móvil.
 - [ ] Rellenar el formulario de contacto y **comprobar que le llega el correo**.
-      Si no llega: `npx wrangler tail` dice por qué (lo normal es que la
-      dirección de destino no esté verificada todavía).
+
+> **Esto es lo único que no se ha podido probar de antemano.** El Worker entero
+> funciona —lo comprobé con `wrangler dev`: rutas, validación, antispam, el 404
+> y la redirección de barra final—, pero en local el envío de correo está
+> simulado: contesta que sí sin mandar nada. El envío de verdad solo se puede
+> probar con la zona ya en Cloudflare.
+>
+> Si no llega, `npx wrangler tail` dice el motivo. Los dos habituales:
+>
+> - **La dirección de destino no está verificada** en Email Routing. Es el caso
+>   más probable. Se arregla en el paso 4.
+> - **El remitente no vale.** `REMITENTE` en `wrangler.jsonc` es
+>   `web@lindairiane.com`. Tiene que ser del dominio de la zona; si Cloudflare
+>   lo rechaza, prueba con una dirección que exista como regla en Email Routing.
+>
+> Mientras no funcione no se rompe nada: el formulario se cae solo al `mailto:`
+> y abre el correo del visitante, como hasta ahora.
 - [ ] Que **ella** publique una entrada de prueba desde `/escribir/`, con foto.
 - [ ] Verla aparecer en la web al cabo de un minuto.
 - [ ] Borrarla después: se quita el fichero de `content/entradas/` y se hace push.
