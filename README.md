@@ -1,6 +1,6 @@
 # lindaporn
 
-Web de **Linda Iriane** (lindairiane.com) reconstruida en HTML, CSS y JavaScript vainilla,
+Web de **Linda Iriane** (lindaporn.com) reconstruida en HTML, CSS y JavaScript vainilla,
 saliendo de WordPress.
 
 Sin framework, sin bundler, sin `node_modules`. El único requisito para generar el sitio
@@ -51,7 +51,7 @@ docs/                La web generada. No se versiona: se construye al desplegar.
 ```
 
 `build.js` no depende de nada externo. Cada página se genera con rutas **relativas**,
-así que la web funciona igual en `lindairiane.com`, en `usuario.github.io/lindaporn/`
+así que la web funciona igual en `lindaporn.com`, en `usuario.github.io/lindaporn/`
 o abriendo `docs/index.html` a pelo desde el disco.
 
 ## Comandos
@@ -176,7 +176,7 @@ y el formulario solo escribe a Linda. Sale gratis.
 
 Hace falta, una vez:
 
-1. `lindairiane.com` como zona en Cloudflare.
+1. `lindaporn.com` como zona en Cloudflare.
 2. Email Routing activado y `lindairianescort@gmail.com` verificada como
    dirección de destino.
 3. Que `destination_address` en `wrangler.jsonc` sea esa misma dirección.

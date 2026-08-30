@@ -12,7 +12,7 @@ Para escribir tienes tu propia página de escribir.
 **1.** Entra en:
 
 ```
-lindairiane.com/escribir/
+lindaporn.com/escribir/
 ```
 
 Guárdalo en favoritos. La primera vez te pedirá tu clave; luego ya no.

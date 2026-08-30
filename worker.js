@@ -70,7 +70,7 @@ function correo({ nombre, email, mensaje, env }) {
     '—',
     `De: ${nombre}`,
     `Email: ${email}`,
-    'Enviado desde el formulario de lindairiane.com',
+    `Enviado desde el formulario de ${dominio(env)}`,
   ].join('\r\n');
 
   // El nombre entero va en el cuerpo; en las cabeceras solo una versión corta
@@ -83,7 +83,7 @@ function correo({ nombre, email, mensaje, env }) {
     // Así, al darle a responder, la respuesta va a quien escribió.
     `Reply-To: "${corto}" <${email}>`,
     `Subject: ${asunto(`Contacto web — ${corto}`)}`,
-    `Message-ID: <${crypto.randomUUID()}@lindairiane.com>`,
+    `Message-ID: <${crypto.randomUUID()}@${dominio(env)}>`,
     `Date: ${fechaRfc()}`,
     'MIME-Version: 1.0',
     'Content-Type: text/plain; charset=utf-8',
@@ -124,6 +124,9 @@ function asunto(texto) {
 // colar cabeceras extra (un Bcc, por ejemplo).
 const paraCabecera = (valor) =>
   valor.replace(/[\r\n"<>]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 50) || 'sin nombre';
+
+// El dominio sale del remitente: así solo se toca wrangler.jsonc si cambia.
+const dominio = (env) => env.REMITENTE.split('@')[1];
 
 // toUTCString() acaba en "GMT"; el RFC 5322 pide el desfase numérico.
 const fechaRfc = () => new Date().toUTCString().replace('GMT', '+0000');
