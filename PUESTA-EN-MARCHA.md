@@ -87,16 +87,16 @@ El repositorio de ella es **el que manda**: de ahí despliega el Worker y ahí
 escribe el editor. El tuyo queda como copia tuya, y tú tienes acceso a los dos.
 
 - [ ] Ella crea cuenta en github.com y activa la verificación en dos pasos.
-- [ ] Ella crea un repositorio **vacío** llamado `lindaporn`.
+- [ ] Ella crea un repositorio **vacío**. El suyo es `lindairiane/web`.
 - [ ] Que te añada como **colaborador** (Settings → Collaborators).
 - [ ] Subirle el contenido desde tu copia local:
 
 ```bash
-git remote add cliente https://github.com/ELLA/lindaporn.git
+git remote add cliente https://github.com/lindairiane/web.git
 git push cliente main
 ```
 
-- [ ] Editar `content/site.json` → `"repo": "ELLA/lindaporn"`. **Esto es
+- [ ] Editar `content/site.json` → `"repo": "lindairiane/web"`. **Esto es
       imprescindible**: si se queda apuntando al tuyo, ella publicará entradas
       en tu repositorio y la web no se enterará.
 
@@ -106,8 +106,8 @@ Se le dan a un mismo remoto dos direcciones de escritura. Se descarga del suyo
 —que es el bueno— y se sube a los dos a la vez:
 
 ```bash
-git remote set-url origin https://github.com/ELLA/lindaporn.git
-git remote set-url --add --push origin https://github.com/ELLA/lindaporn.git
+git remote set-url origin https://github.com/lindairiane/web.git
+git remote set-url --add --push origin https://github.com/lindairiane/web.git
 git remote set-url --add --push origin https://github.com/meowrhino/lindaporn.git
 git remote -v      # comprobar: un fetch (el de ella) y dos push
 ```
@@ -125,7 +125,7 @@ entradas desde `/escribir/`, así que su repositorio avanza solo y el tuyo no.
 
 - [ ] En su GitHub: Settings → Developer settings → Personal access tokens →
       **Fine-grained tokens** → Generate new token.
-- [ ] Repositorio: **solo** `lindaporn`. Permisos: **Contents → Read and write**.
+- [ ] Repositorio: **solo** `web`. Permisos: **Contents → Read and write**.
       Nada más. Caducidad: la que quiera; cuando caduque se hace otro.
 - [ ] Copiar el token (solo se ve una vez) y pegarlo en `/escribir/`.
 

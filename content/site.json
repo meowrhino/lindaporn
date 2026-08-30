@@ -247,7 +247,7 @@
   "avisoCookies": "Usamos cookies para mejorar tu experiencia en todos los sentidos.",
 
   "_repo": "Dónde vive el código. El editor de /escribir/ publica aquí. Al traspasar el repo a otra cuenta, cambiar esta línea y nada más.",
-  "repo": "meowrhino/lindaporn",
+  "repo": "lindairiane/web",
   "rama": "main",
 
   "_endpointContacto": "Lo atiende worker.js en Cloudflare. Mientras no esté desplegado, el formulario se cae solo al mailto:.",
