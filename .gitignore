@@ -7,3 +7,6 @@ docs/
 
 node_modules/
 .DS_Store
+
+# Estado local de wrangler dev.
+.wrangler/
