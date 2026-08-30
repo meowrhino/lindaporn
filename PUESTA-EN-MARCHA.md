@@ -81,20 +81,45 @@ depende de ello. Mientras tanto se hacen los pasos 1 y 2.
       lo gestiona él).
 - [ ] Seguir con lo demás. La zona pasará a «Active» en un rato.
 
-## 1 · GitHub
+## 1 · GitHub: dos repositorios, uno de verdad
+
+El repositorio de ella es **el que manda**: de ahí despliega el Worker y ahí
+escribe el editor. El tuyo queda como copia tuya, y tú tienes acceso a los dos.
 
 - [ ] Ella crea cuenta en github.com y activa la verificación en dos pasos.
-- [ ] Tú: Settings → Danger Zone → **Transfer ownership** del repo `lindaporn`
-      a su usuario. Se lleva el historial, las Actions y los enlaces viejos
-      redirigen solos.
-- [ ] Ella acepta el traspaso desde su correo.
-- [ ] Que te añada como **colaborador** del repo ya traspasado, para poder
-      seguir haciendo push.
-- [ ] En tu copia local: `git remote set-url origin https://github.com/ELLA/lindaporn.git`
-- [ ] Editar `content/site.json` → `"repo": "ELLA/lindaporn"`, y push.
+- [ ] Ella crea un repositorio **vacío** llamado `lindaporn`.
+- [ ] Que te añada como **colaborador** (Settings → Collaborators).
+- [ ] Subirle el contenido desde tu copia local:
 
-> Traspasar, no crear un repo nuevo y empujar: así no se pierden los commits ni
-> hay que reconfigurar las Actions.
+```bash
+git remote add cliente https://github.com/ELLA/lindaporn.git
+git push cliente main
+```
+
+- [ ] Editar `content/site.json` → `"repo": "ELLA/lindaporn"`. **Esto es
+      imprescindible**: si se queda apuntando al tuyo, ella publicará entradas
+      en tu repositorio y la web no se enterará.
+
+### Que un solo `git push` actualice los dos
+
+Se le dan a un mismo remoto dos direcciones de escritura. Se descarga del suyo
+—que es el bueno— y se sube a los dos a la vez:
+
+```bash
+git remote set-url origin https://github.com/ELLA/lindaporn.git
+git remote set-url --add --push origin https://github.com/ELLA/lindaporn.git
+git remote set-url --add --push origin https://github.com/meowrhino/lindaporn.git
+git remote -v      # comprobar: un fetch (el de ella) y dos push
+```
+
+A partir de ahí, `git push` los deja iguales sin pensar.
+
+**La única regla:** `git pull` antes de ponerte a trabajar. Ella publica
+entradas desde `/escribir/`, así que su repositorio avanza solo y el tuyo no.
+
+> Si prefieres no mantener dos copias, la alternativa es traspasarle el
+> repositorio (Settings → Transfer ownership): se lleva el historial y las
+> Actions, y los enlaces viejos redirigen. Pero entonces solo hay uno.
 
 ## 2 · Su clave para escribir
 
@@ -135,8 +160,8 @@ npm run deploy
 - [ ] Abrir la URL `*.workers.dev` que devuelve y ver que la web carga.
 - [ ] Worker → Settings → **Domains & Routes** → añadir `lindairiane.com` y
       `www.lindairiane.com`.
-- [ ] Worker → Settings → **Builds** → Connect → elegir el repo. A partir de
-      aquí cada push despliega solo.
+- [ ] Worker → Settings → **Builds** → Connect → elegir **el repositorio de
+      ella**, no el tuyo. A partir de aquí cada push despliega solo.
 
 ## 6 · Probar de verdad, con ella delante
 
