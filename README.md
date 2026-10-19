@@ -3,16 +3,18 @@
 Web de **Linda Iriane** (lindaporn.com) reconstruida en HTML, CSS y JavaScript vainilla,
 saliendo de WordPress.
 
-Sin framework, sin bundler, sin `node_modules`. El único requisito para generar el sitio
-es Node 20 o superior, y solo porque el generador está escrito en JavaScript.
+Sin framework ni bundler. Para generar el sitio, Node 22 y una dependencia, `sharp`, que
+hace las miniaturas y las imágenes para compartir (sin ella se publica igual y avisa).
+Sigue la receta del estudio ([meowrhino/JAMstack](https://github.com/meowrhino/JAMstack)),
+en su versión para un blog: las entradas son ficheros por fecha, no carpetas de proyecto.
 
 | | Antes (WordPress) | Ahora |
 |---|---|---|
 | CSS | 2,5 MB (tema Podium + WPBakery) | 23 KB |
 | JavaScript | jQuery + Revolution Slider + Swiper + 12 plugins | 6 KB propios |
-| Dependencias | ~15 plugins, PHP, MySQL | ninguna |
+| Dependencias | ~15 plugins, PHP, MySQL | sharp, al generar |
 | Alojamiento | hosting con PHP | Cloudflare Workers (static assets) |
-| Imágenes | JPG/PNG sin optimizar | WebP (261 imágenes, 32 MB) |
+| Imágenes | JPG/PNG sin optimizar | WebP (261 imágenes, 26 MB; las miniaturas, del build) |
 
 111 páginas: 8 fijas, 91 entradas de blog, 8 de paginación, 2 categorías, el editor y un 404.
 
@@ -21,54 +23,53 @@ es Node 20 o superior, y solo porque el generador está escrito en JavaScript.
 ## Cómo funciona
 
 ```
-content/           Los datos. Es lo que se edita.
-  site.json          Textos, menú, tarifas, galerías, contacto.
-  entradas/          Una entrada de blog por fichero. Ver abajo.
-    blog-escort/       55 entradas
-    uncategorized/     36 entradas
-  images.json        Mapa imagen original → WebP local. Lo genera tools/images.js.
-  media.json         Metadatos de las imágenes (alt, medidas).
-  pages.json         Las páginas tal como estaban en WordPress. De aquí salen
-                     Cookies y Nota legal, sin retocar.
-  pages-scraped.json Texto de las páginas ya renderizadas. Solo como referencia.
+data/
+  site.json          Textos, menú, tarifas, galerías, contacto. Con su esquema en
+                     schema/site.json: VS Code autocompleta y subraya lo que está mal,
+                     y el build para con el mismo mensaje.
+  pages.json         Cookies y Nota legal, con el HTML que tenían en WordPress.
+posts/               Una entrada de blog por fichero. Ver abajo.
+  blog-escort/         55 entradas
+  uncategorized/       36 entradas
 
-src/
-  templates.js       Plantillas HTML. Funciones puras: datos → cadena.
-  styles.css         Toda la hoja de estilos.
-  main.js            Carrusel, menú, galería, aviso de cookies y formulario.
-  escribir.html/.js/.css   El editor de /escribir/. No forma parte de la web
-                     pública: es la herramienta con la que ella escribe.
+build/
+  build.mjs          El generador. Lee data/ + posts/ + css/ + js/ y escribe dist/.
+  paginas.mjs        Plantillas HTML. Funciones puras: datos → cadena.
+  validar.mjs        Leer un JSON diciendo dónde está la coma, y validarlo (de almarbra).
+  check.mjs          Revisa dist/: enlaces rotos, fotos que faltan, restos de WordPress.
+  escribir.html      La página del editor de /escribir/.
+css/  js/            styles.css y main.js (carrusel, menú, galería, cookies, formulario);
+                     transicion.css/.js, la transición entre páginas de la casa
+                     (JAMstack, patrones §6c); escribir.css/.js, el editor. No forma
+                     parte de la web pública: es la herramienta con la que ella escribe.
+                     Se publican en assets/, como antes.
 
 assets/
-  img/               Las imágenes en WebP (versión grande + miniatura).
+  img/               Las fotos en WebP, una sola versión. Las miniaturas (640 px) y las
+                     de compartir (1200×630) las hace el build en .cache/, fuera de git.
   fonts/             Cormorant y Mrs Saint Delafield alojadas aquí.
 
-tools/               Scripts de una sola vez, para traerse cosas del WordPress.
-build.js             El generador. Lee content/ + src/ y escribe docs/.
 worker.js            Lo único que corre en servidor: POST /api/contacto.
 wrangler.jsonc       Configuración del Worker de Cloudflare.
-docs/                La web generada. No se versiona: se construye al desplegar.
+manus/wordpress/     Lo de traerse la web del WordPress viejo, de una sola vez: los
+                     scripts (escriben en content/, que ya no existe) y lo que sacaron.
+dist/                La web generada. No se versiona: se construye al publicar.
 ```
 
-`build.js` no depende de nada externo. Cada página se genera con rutas **relativas**,
-así que la web funciona igual en `lindaporn.com`, en `usuario.github.io/lindaporn/`
-o abriendo `docs/index.html` a pelo desde el disco.
+`build/build.mjs` genera cada página con rutas **relativas**, así que la web funciona igual en
+`lindaporn.com`, en `meowrhino.github.io/lindaporn/` o abriendo `dist/index.html` desde
+el disco. Construida en la Action de GitHub lleva `noindex`: la de verdad es lindaporn.com.
 
 ## Comandos
 
 ```bash
-npm run build    # genera docs/
+npm run build    # genera dist/
 npm run check    # genera y revisa enlaces rotos e imágenes que falten
 npm run serve    # genera y sirve en http://localhost:4321
 ```
 
-Y los que solo hacen falta si hay que volver a leer del WordPress viejo:
-
-```bash
-npm run extract  # vuelca posts y páginas desde /wp-json a content/
-npm run images   # descarga las imágenes y las convierte a WebP (necesita: brew install webp)
-npm run fonts    # vuelve a bajar las tipografías de Google Fonts
-```
+Lo de leer del WordPress viejo (`extract`, `images`, `fonts`) ya se hizo y está en
+`manus/wordpress/`.
 
 ---
 
@@ -76,21 +77,20 @@ npm run fonts    # vuelve a bajar las tipografías de Google Fonts
 
 ### Cambiar un texto, un precio o el teléfono
 
-Todo está en [`content/site.json`](content/site.json). Edita, `npm run build`, listo.
+Todo está en [`data/site.json`](data/site.json). Edita, `npm run build`, listo.
 
 ### Añadir una foto a una galería
 
-1. Deja el archivo en `.cache/originals/AÑO/MES/nombre.jpg`
-2. `npm run images`
-3. Añade `"AÑO/MES/nombre.jpg"` a la lista de `galerias` en `site.json`
-4. `npm run build`
+1. La foto en WebP (imgToWeb) en `assets/img/AÑO/MES/nombre.webp`
+2. Añade `"AÑO/MES/nombre"` (sin extensión) a `photos` de su galería en `site.json`
+3. `npm run build`
 
 ### Escribir una entrada nueva
 
 Una entrada es **un fichero**. Se crea dentro de la carpeta de su categoría:
 
 ```
-content/entradas/blog-escort/2026-09-01_titulo-de-la-entrada.html
+posts/blog-escort/2026-09-01_titulo-de-la-entrada.html
 ```
 
 El nombre del fichero lleva los metadatos: la fecha (`AAAA-MM-DD`) y el slug,
@@ -106,7 +106,7 @@ categoría. Dentro, el primer `<h1>` es el título y el resto es el texto:
 
 Nada más. Ni fechas repetidas, ni JSON, ni ids. La miniatura del listado es la
 primera imagen que aparezca en el texto; si se quiere otra, se declara arriba
-del todo con `<!-- portada: 2018/10/foto.jpg -->`.
+del todo con `<!-- portada: 2018/10/foto -->`.
 
 `npm run build` y la entrada ya está en el blog, en la portada, en el feed RSS
 y en el sitemap.
@@ -117,9 +117,8 @@ En `/escribir/` hay un editor que hace todo eso solo: título, fecha, categoría
 texto con negrita/cursiva/enlaces y fotos. Al darle a Publicar hace **un único
 commit** con la entrada y sus imágenes, y el Action reconstruye la web.
 
-Las fotos se convierten a WebP **en el propio navegador** (`canvas.toBlob`), en
-las dos medidas que usa el sitio (1800 px y 640 px de miniatura). No hace falta
-`cwebp` ni pasar por `npm run images`: funciona igual desde el móvil.
+Las fotos se convierten a WebP **en el propio navegador** (`canvas.toBlob`), a
+1800 px; la miniatura la hace el build. Funciona igual desde el móvil.
 
 No hay servidor detrás. La página habla directamente con la API de GitHub usando
 un *fine-grained token* que se guarda en el navegador de quien escribe. La página
@@ -129,28 +128,28 @@ Para el token: GitHub → Settings → Developer settings → Personal access to
 Fine-grained tokens. Solo este repositorio, permiso **Contents: Read and write**,
 y nada más. Con eso solo se puede escribir en el contenido de esta web.
 
-Instrucciones para la clienta, en cristiano: [PARA-LINDA.md](PARA-LINDA.md).
+Instrucciones para Linda, en cristiano: [GUIA.md](GUIA.md).
 
-Si el repositorio cambia de cuenta, se toca **una línea**: `"repo"` en
-`content/site.json`.
+Publica en el repo de `"repo"` en `data/site.json` (el de Linda); construida en la
+Action, en el repo de la Action (la nuestra).
 
 ---
 
 ## Publicación
 
 La web se sirve desde **Cloudflare Workers con static assets**, en la cuenta de
-Linda. Un `git push` dispara Workers Builds, que ejecuta `node build.js` y
-despliega `docs/`.
+Linda. Un `git push` dispara Workers Builds, que ejecuta `node build/build.mjs` (y `build/check.mjs`) y
+despliega `dist/`.
 
 Los ficheros estáticos no pasan por el Worker: sus peticiones son
 [gratis e ilimitadas](https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/),
 sin coste de almacenamiento. El Worker solo se ejecuta para `/api/contacto`.
 El plan gratuito admite 20.000 ficheros por versión; la web tiene unos 650.
 
-`.github/workflows/deploy.yml` sigue existiendo, pero ya solo **comprueba**
-—genera el sitio y valida enlaces e imágenes— y mantiene una copia en GitHub
-Pages como respaldo mientras el dominio no apunte a Cloudflare. Se puede quitar
-el job `deploy` cuando la web esté en marcha.
+`.github/workflows/deploy.yml` corre **solo en nuestra copia** (`meowrhino/lindaporn`):
+genera, revisa enlaces e imágenes y publica en `meowrhino.github.io/lindaporn/` con
+`noindex`. Si falla, abre un issue con el error y lo cierra al volver a publicar; cómo
+arreglarlo, en [CLAUDE.md](CLAUDE.md). En la copia de Linda no corre: publica Workers Builds.
 
 ### Poner en marcha el Worker
 
@@ -207,7 +206,7 @@ había. Lo único que falta es lo que dependía de PHP o de un servicio ajeno.
   el formulario abre el correo del visitante con el mensaje ya escrito (`mailto:`).
   Si se prefiere recibirlos en el buzón sin que se abra nada, la opción más simple es
   [Formspree](https://formspree.io): cambia el `<form>` para que apunte a su endpoint y
-  borra la función `formularioContacto` de `src/main.js`.
+  borra la función `formularioContacto` de `js/main.js`.
 - **Banderas de idioma.** Eran el widget de GTranslate, que traducía la web con Google
   al vuelo mediante un script externo. Está pendiente de decidir si se recupera.
 - **Feed de Instagram del pie y de la barra lateral.** Llevaba tiempo roto en el
@@ -223,7 +222,7 @@ Y dos correcciones sobre errores que arrastraba el original:
 - **La página `/nota-legal/` contiene una sola palabra: «Linda».** Se ha dejado tal cual
   porque es lo que había, pero está vacía a efectos prácticos y debería redactarse.
   Lo mismo con `/cookies/`: el texto es el del plugin de WordPress y menciona Google
-  Analytics, que esta web ya no usa. Ambas se editan en `content/pages.json`.
+  Analytics, que esta web ya no usa. Ambas se editan en `data/pages.json`.
 
 ### Imágenes que no se pudieron recuperar
 

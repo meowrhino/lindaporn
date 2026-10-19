@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "data/pages.json: Cookies y Nota legal",
+  "description": "data/pages.json: las páginas legales, con el HTML que tenían en WordPress. Lo lee VS Code (por el \"$schema\" de arriba) y el build valida con él.",
+  "type": "object",
+  "required": [
+    "pages"
+  ],
+  "additionalProperties": false,
+  "patternProperties": {
+    "^_": {
+      "type": "string",
+      "description": "Una nota para quien edita. No sale en la web."
+    }
+  },
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "pages": {
+      "type": "array",
+      "description": "Una por página; cuál sale y dónde, en data/site.json → legalPages.",
+      "items": {
+        "type": "object",
+        "required": [
+          "slug",
+          "html"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "slug": {
+            "type": "string",
+            "description": "Su nombre, el mismo que en data/site.json → legalPages."
+          },
+          "title": {
+            "type": "string",
+            "description": "El título que tenía en WordPress."
+          },
+          "html": {
+            "type": "string",
+            "description": "El texto, en HTML."
+          }
+        }
+      }
+    }
+  }
+}

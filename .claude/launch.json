@@ -4,7 +4,7 @@
     {
       "name": "lindaporn",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["--yes", "serve", "docs", "-l", "4321"],
+      "runtimeArgs": ["--yes", "serve", "dist", "-l", "4321"],
       "port": 4321
     }
   ]

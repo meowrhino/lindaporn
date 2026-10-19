@@ -37,7 +37,7 @@ las dos, así que cada una cae en su sitio y el posicionamiento se traslada.
 ## Ya hecho
 
 - [x] Repositorio de ella: `lindairiane/web`, con todo subido.
-- [x] `content/site.json` apuntando a ese repositorio y a `lindaporn.com`.
+- [x] `data/site.json` apuntando a ese repositorio y a `lindaporn.com`.
 - [x] `lindaporn.com` en su Cloudflare, con los nameservers cambiados y la zona
       activa.
 
@@ -125,7 +125,7 @@ Genera la web, comprueba que no haya nada roto y sube el Worker.
       dirección de destino no esté verificada todavía (paso 4).
 - [ ] Que **ella** publique una entrada de prueba desde `/escribir/`, con foto.
 - [ ] Verla aparecer en la web al cabo de un minuto.
-- [ ] Borrarla después: se quita el fichero de `content/entradas/` y se hace push.
+- [ ] Borrarla después: se quita el fichero de `posts/` y se hace push.
 
 ## 7 · El WordPress viejo
 
@@ -147,7 +147,7 @@ sigue funcionando igual, con su correo.
 - No hay que actualizar nada nunca más.
 - Todo lo que publique queda guardado con su fecha y se puede recuperar.
 - Para escribir: `lindaporn.com/escribir/`, que lo guarde en favoritos.
-- Las instrucciones para ella están en [PARA-LINDA.md](PARA-LINDA.md).
+- Las instrucciones para ella están en [GUIA.md](GUIA.md).
 
 ## Lo que conviene que decida ella
 

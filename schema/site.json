@@ -1,0 +1,607 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "data/site.json: lo general de la web",
+  "description": "data/site.json: lo general de la web de Linda. Este fichero lo lee VS Code (por el \"$schema\" de arriba del JSON) para autocompletar, explicar cada campo y subrayar lo que está mal; el build valida con él mismo.",
+  "type": "object",
+  "additionalProperties": false,
+  "patternProperties": {
+    "^_": {
+      "type": "string",
+      "description": "Una nota para quien edita. No sale en la web."
+    }
+  },
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string",
+      "description": "El nombre de la web: arriba a la izquierda, en la pestaña, en Google y al compartir."
+    },
+    "tagline": {
+      "type": "string",
+      "description": "La línea de debajo del nombre, y en el título de la portada."
+    },
+    "description": {
+      "type": "string",
+      "description": "Lo que sale en Google debajo del título (unos 150 caracteres)."
+    },
+    "lang": {
+      "type": "string",
+      "enum": [
+        "es"
+      ],
+      "description": "El idioma de la web."
+    },
+    "url": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^https://",
+      "description": "El dominio, como \"https://lindaporn.com\". Con null, Google no la indexa."
+    },
+    "copyright": {
+      "type": "string",
+      "description": "La línea de abajo del todo."
+    },
+    "favicon": {
+      "$ref": "#/$defs/foto",
+      "description": "La foto del icono de la pestaña."
+    },
+    "contact": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^_": {
+          "type": "string",
+          "description": "Una nota para quien edita. No sale en la web."
+        }
+      },
+      "properties": {
+        "phone": {
+          "type": "string",
+          "description": "El teléfono como se lee."
+        },
+        "phoneRaw": {
+          "type": "string",
+          "pattern": "^\\+\\d+$",
+          "description": "El mismo teléfono, solo + y números: es al que llama el móvil."
+        },
+        "email": {
+          "type": "string",
+          "description": "El correo."
+        },
+        "hours": {
+          "type": "string",
+          "description": "El horario."
+        },
+        "days": {
+          "type": "string",
+          "description": "Los días."
+        },
+        "places": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Las ciudades, una por línea."
+        }
+      },
+      "required": [
+        "phone",
+        "phoneRaw",
+        "email"
+      ]
+    },
+    "social": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "patternProperties": {
+          "^_": {
+            "type": "string",
+            "description": "Una nota para quien edita. No sale en la web."
+          }
+        },
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "El nombre de la red."
+          },
+          "url": {
+            "$ref": "#/$defs/url"
+          }
+        },
+        "required": [
+          "name",
+          "url"
+        ]
+      },
+      "description": "Las redes, en los laterales y en el pie."
+    },
+    "menu": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/menu"
+      },
+      "description": "El menú de arriba, en orden."
+    },
+    "footerMenu": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/enlace"
+      },
+      "description": "Los enlaces del pie, en orden."
+    },
+    "hero": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "patternProperties": {
+          "^_": {
+            "type": "string",
+            "description": "Una nota para quien edita. No sale en la web."
+          }
+        },
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "La frase grande."
+          },
+          "subtitle": {
+            "type": "string",
+            "description": "La línea pequeña."
+          },
+          "button": {
+            "type": "string",
+            "description": "Lo que dice el botón."
+          },
+          "url": {
+            "$ref": "#/$defs/url"
+          },
+          "image": {
+            "$ref": "#/$defs/foto"
+          },
+          "tone": {
+            "type": "string",
+            "enum": [
+              "oscuro",
+              "claro"
+            ],
+            "description": "El color de la letra sobre la foto."
+          }
+        },
+        "required": [
+          "title",
+          "image"
+        ]
+      },
+      "description": "Las fotos que van pasando arriba de la portada; la primera también sale al compartir."
+    },
+    "home": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^_": {
+          "type": "string",
+          "description": "Una nota para quien edita. No sale en la web."
+        }
+      },
+      "properties": {
+        "intro": {
+          "type": "object",
+          "additionalProperties": false,
+          "patternProperties": {
+            "^_": {
+              "type": "string",
+              "description": "Una nota para quien edita. No sale en la web."
+            }
+          },
+          "properties": {
+            "title": {
+              "type": "string",
+              "description": "El rótulo."
+            },
+            "subtitle": {
+              "type": "string",
+              "description": "Debajo del rótulo."
+            },
+            "paragraphs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Un párrafo por línea."
+            }
+          },
+          "required": [
+            "title",
+            "paragraphs"
+          ]
+        },
+        "bio": {
+          "type": "object",
+          "additionalProperties": false,
+          "patternProperties": {
+            "^_": {
+              "type": "string",
+              "description": "Una nota para quien edita. No sale en la web."
+            }
+          },
+          "properties": {
+            "text": {
+              "type": "string",
+              "description": "El texto grande al lado de la foto."
+            },
+            "image": {
+              "$ref": "#/$defs/foto"
+            },
+            "button": {
+              "$ref": "#/$defs/enlace"
+            }
+          },
+          "required": [
+            "text"
+          ]
+        },
+        "darkBand": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "La franja oscura: un párrafo por columna."
+        },
+        "quote": {
+          "type": "string",
+          "description": "La frase de la franja negra."
+        },
+        "callouts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "patternProperties": {
+              "^_": {
+                "type": "string",
+                "description": "Una nota para quien edita. No sale en la web."
+              }
+            },
+            "properties": {
+              "subtitle": {
+                "type": "string",
+                "description": "La línea pequeña de encima. Opcional."
+              },
+              "title": {
+                "type": "string",
+                "description": "El título."
+              },
+              "url": {
+                "$ref": "#/$defs/url"
+              },
+              "button": {
+                "type": "string",
+                "description": "Lo que dice el botón."
+              },
+              "image": {
+                "$ref": "#/$defs/foto",
+                "description": "La foto de fondo. Sin foto, el fondo es oscuro."
+              }
+            },
+            "required": [
+              "title",
+              "url"
+            ]
+          },
+          "description": "Los recuadros de abajo de la portada."
+        }
+      },
+      "required": [
+        "intro",
+        "bio"
+      ],
+      "description": "La portada."
+    },
+    "services": {
+      "$ref": "#/$defs/tarifas",
+      "description": "La página /servicios/."
+    },
+    "bdsm": {
+      "$ref": "#/$defs/tarifas",
+      "description": "La página /bdsm/."
+    },
+    "galleries": {
+      "type": "object",
+      "description": "Las galerías: /ultimas-fotos/ y /mis-fotos/.",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "patternProperties": {
+          "^_": {
+            "type": "string",
+            "description": "Una nota para quien edita. No sale en la web."
+          }
+        },
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "El rótulo de la página."
+          },
+          "intro": {
+            "type": "string",
+            "description": "El párrafo de arriba."
+          },
+          "photos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/foto"
+            },
+            "description": "Las fotos, en orden. La primera sale al compartir."
+          }
+        },
+        "required": [
+          "title",
+          "photos"
+        ]
+      }
+    },
+    "contactPage": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^_": {
+          "type": "string",
+          "description": "Una nota para quien edita. No sale en la web."
+        }
+      },
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "El rótulo."
+        },
+        "subtitle": {
+          "type": "string",
+          "description": "Debajo del rótulo."
+        },
+        "formNote": {
+          "type": "string",
+          "description": "La línea de debajo del formulario."
+        }
+      },
+      "required": [
+        "title"
+      ]
+    },
+    "cookieNotice": {
+      "type": "string",
+      "description": "El aviso de cookies de abajo."
+    },
+    "repo": {
+      "type": "string",
+      "pattern": "^[\\w.-]+/[\\w.-]+$",
+      "description": "El repositorio donde publica /escribir/, como \"lindairiane/web\"."
+    },
+    "branch": {
+      "type": "string",
+      "description": "La rama donde publica /escribir/: \"main\"."
+    },
+    "contactEndpoint": {
+      "type": "string",
+      "description": "Adónde manda el formulario: \"/api/contacto\" (worker.js)."
+    },
+    "categories": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "El nombre que se ve de cada carpeta de posts/."
+    },
+    "legalPages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "patternProperties": {
+          "^_": {
+            "type": "string",
+            "description": "Una nota para quien edita. No sale en la web."
+          }
+        },
+        "properties": {
+          "slug": {
+            "type": "string",
+            "description": "Su nombre en data/pages.json."
+          },
+          "title": {
+            "type": "string",
+            "description": "El título."
+          },
+          "url": {
+            "$ref": "#/$defs/url"
+          }
+        },
+        "required": [
+          "slug",
+          "title",
+          "url"
+        ]
+      },
+      "description": "Cookies y Nota legal."
+    }
+  },
+  "required": [
+    "title",
+    "description",
+    "lang",
+    "url",
+    "contact",
+    "menu",
+    "hero",
+    "home",
+    "services",
+    "bdsm",
+    "galleries",
+    "repo",
+    "branch",
+    "categories"
+  ],
+  "$defs": {
+    "foto": {
+      "type": "string",
+      "pattern": "^[^.]+$",
+      "description": "Una foto de assets/img/, con su carpeta y sin extensión: \"2018/10/foto\" es assets/img/2018/10/foto.webp."
+    },
+    "url": {
+      "type": "string",
+      "pattern": "^(/|https?://|mailto:|tel:)",
+      "description": "Una página de la web, de / a /, como \"/contacto/\", o una dirección entera, como \"https://…\"."
+    },
+    "enlace": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^_": {
+          "type": "string",
+          "description": "Una nota para quien edita. No sale en la web."
+        }
+      },
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "Lo que se lee."
+        },
+        "url": {
+          "$ref": "#/$defs/url"
+        }
+      },
+      "required": [
+        "text",
+        "url"
+      ]
+    },
+    "menu": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^_": {
+          "type": "string",
+          "description": "Una nota para quien edita. No sale en la web."
+        }
+      },
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "Lo que se lee en el menú."
+        },
+        "url": {
+          "$ref": "#/$defs/url"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/enlace"
+          },
+          "description": "El desplegable: lo que sale al pasar por encima."
+        }
+      },
+      "required": [
+        "text",
+        "url"
+      ]
+    },
+    "tarifas": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^_": {
+          "type": "string",
+          "description": "Una nota para quien edita. No sale en la web."
+        }
+      },
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "El rótulo grande de la página."
+        },
+        "subtitle": {
+          "type": "string",
+          "description": "La línea de debajo del rótulo."
+        },
+        "intro": {
+          "type": "string",
+          "description": "El párrafo de arriba. Opcional."
+        },
+        "cover": {
+          "$ref": "#/$defs/foto",
+          "description": "La foto de arriba del todo; también sale al compartir."
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "patternProperties": {
+              "^_": {
+                "type": "string",
+                "description": "Una nota para quien edita. No sale en la web."
+              }
+            },
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "El nombre del bloque, como \"Erótico\"."
+              },
+              "unit": {
+                "type": "string",
+                "description": "Debajo del nombre, como \"por hora\"."
+              },
+              "rates": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "patternProperties": {
+                    "^_": {
+                      "type": "string",
+                      "description": "Una nota para quien edita. No sale en la web."
+                    }
+                  },
+                  "properties": {
+                    "item": {
+                      "type": "string",
+                      "description": "El servicio."
+                    },
+                    "price": {
+                      "type": "string",
+                      "description": "El precio, con su símbolo: \"150€\"."
+                    }
+                  },
+                  "required": [
+                    "item",
+                    "price"
+                  ]
+                },
+                "description": "Una línea por servicio."
+              }
+            },
+            "required": [
+              "name",
+              "rates"
+            ]
+          },
+          "description": "Cada bloque de precios, en orden."
+        },
+        "note": {
+          "type": "string",
+          "description": "La línea pequeña de debajo de los precios."
+        }
+      },
+      "required": [
+        "title",
+        "blocks"
+      ]
+    }
+  }
+}

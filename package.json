@@ -3,18 +3,18 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Web de Linda Iriane en HTML, CSS y JavaScript vainilla. Sin WordPress y sin dependencias.",
+  "description": "Web de Linda Iriane en HTML, CSS y JavaScript vainilla, generada en dist/. Solo depende de sharp (miniaturas e imágenes para compartir).",
   "engines": {
-    "node": ">=20"
+    "node": "22"
   },
   "scripts": {
-    "build": "node build.js",
-    "check": "node build.js && node tools/check.js",
-    "serve": "node build.js && npx --yes serve docs -l 4321",
+    "build": "node build/build.mjs",
+    "check": "node build/build.mjs && node build/check.mjs",
+    "serve": "node build/build.mjs && npx --yes serve dist -l 4321",
     "dev": "npx --yes wrangler dev",
-    "deploy": "node build.js && node tools/check.js && npx --yes wrangler deploy",
-    "extract": "node tools/extract.js && node tools/scrape-pages.js",
-    "images": "node tools/images.js",
-    "fonts": "node tools/fonts.js"
+    "deploy": "node build/build.mjs && node build/check.mjs && npx --yes wrangler deploy"
+  },
+  "dependencies": {
+    "sharp": "^0.35.5"
   }
 }

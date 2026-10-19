@@ -1,6 +1,6 @@
 /* Lo único que corre en servidor de toda la web: recibir el formulario de
    contacto y mandárselo a Linda por correo.
-   El resto (docs/) lo sirve Cloudflare como ficheros estáticos, sin pasar
+   El resto (dist/) lo sirve Cloudflare como ficheros estáticos, sin pasar
    por aquí. Sin dependencias. */
 
 import { EmailMessage } from 'cloudflare:email';
